@@ -1,5 +1,6 @@
 import discord
-from discord_slash import SlashCommand
+from discord_slash import SlashCommand, SlashContext
+from discord_slash.utils.manage_commands import create_option
 from discord.ext import commands
 from youtube_dl import YoutubeDL
 
@@ -14,6 +15,8 @@ music_queue = []
 YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': 'True'}
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 vc = ""
+
+# discord.opus.load_opus()
 
 
 # searching the item on youtube
@@ -60,7 +63,7 @@ async def play_music(vc):
 async def p(ctx, *args):
     query = " ".join(args)
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-    voice_channel = ctx.message.author.voice.channel
+    voice_channel = ctx.author.voice.channel
     if voice_channel is None:
         # you need to be connected so that the bot knows where to go
         await ctx.send("Connect to a voice channel!")
@@ -77,17 +80,26 @@ async def p(ctx, *args):
             await play_music(voice)
 
 
+@slash.slash(name="play", options=[create_option(name="music", description="the music to be played", option_type=3, required=True)])
+async def play(ctx: SlashContext, music: str):
+    await p(ctx, music)
+
+
 @bot.command()
 async def q(ctx):
     retval = ""
     for i in range(0, len(music_queue)):
         retval += music_queue[i][0]['title'] + "\n"
-
-    print(retval)
+    # print(retval)
     if retval != "":
         await ctx.send(retval)
     else:
         await ctx.send("No music in queue")
+
+
+@slash.slash(name="queue")
+async def queue(ctx):
+    await q(ctx)
 
 
 @bot.command()
@@ -99,11 +111,21 @@ async def s(ctx):
         await play_music(voice)
 
 
+@slash.slash(name="skip")
+async def skip(ctx):
+    await s(ctx)
+
+
 @bot.command()
 async def pause(ctx):
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     if voice.is_playing():
         voice.pause()
+
+
+@slash.slash(name="pause")
+async def pause_(ctx):
+    await pause(ctx)
 
 
 @bot.command()
@@ -113,10 +135,20 @@ async def resume(ctx):
         voice.resume()
 
 
+@slash.slash(name="resume")
+async def resume_(ctx):
+    await resume(ctx)
+
+
 @bot.command()
 async def stop(ctx):
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     voice.stop()
+
+
+@slash.slash(name="stop")
+async def stop_(ctx):
+    await stop(ctx)
 
 
 @bot.command()
@@ -126,9 +158,9 @@ async def leave(ctx):
         await voice.disconnect()
 
 
-@slash.slash(name="test")
-async def test(ctx):
-    await ctx.send("Test")
+@slash.slash(name="leave")
+async def leave_(ctx):
+    await leave(ctx)
 
 # start the bot with our token
 bot.run("NzgyODk3NzcxNzQ5MzEwNDg0.X8S4Xg.YV5fFiOvRot6ab-dHKPZUTI6Eb8")
