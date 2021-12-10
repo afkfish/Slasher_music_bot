@@ -1,19 +1,20 @@
 import discord
+from discord_slash import SlashCommand
 from discord.ext import commands
 from youtube_dl import YoutubeDL
 
 bot = commands.Bot(command_prefix='>')
+slash = SlashCommand(bot, sync_commands=True)
 
 # remove the default help command so that we can write out own
 bot.remove_command('help')
-
-# all the music related stuff
 
 # 2d array containing [song, channel]
 music_queue = []
 YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': 'True'}
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 vc = ""
+
 
 # searching the item on youtube
 def search_yt(item):
@@ -97,11 +98,13 @@ async def s(ctx):
         # try to play next in the queue if it exists
         await play_music(voice)
 
+
 @bot.command()
 async def pause(ctx):
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     if voice.is_playing():
         voice.pause()
+
 
 @bot.command()
 async def resume(ctx):
@@ -109,16 +112,23 @@ async def resume(ctx):
     if voice.is_paused():
         voice.resume()
 
+
 @bot.command()
 async def stop(ctx):
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     voice.stop()
+
 
 @bot.command()
 async def leave(ctx):
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     if voice.is_connected():
         await voice.disconnect()
+
+
+@slash.slash(name="test")
+async def test(ctx):
+    await ctx.send("Test")
 
 # start the bot with our token
 bot.run("NzgyODk3NzcxNzQ5MzEwNDg0.X8S4Xg.YV5fFiOvRot6ab-dHKPZUTI6Eb8")
