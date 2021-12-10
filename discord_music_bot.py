@@ -1,4 +1,5 @@
 import discord
+from discord import embeds
 from discord_slash import SlashCommand, SlashContext
 from discord_slash.utils.manage_commands import create_option
 from discord.ext import commands
@@ -75,8 +76,13 @@ async def p(ctx, *args):
                 "a livestream format.")
         else:
             music_queue.append([song, voice_channel])
-            print(music_queue)
-            await ctx.send("Song added to queue.")
+            # print(music_queue)
+            # await ctx.send("Song added to queue.")
+            embed = discord.Embed(title="Song added to queue", color=0x152875)
+            embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
+            embed.add_field(name="{}".format(music_queue[-1][0]['title']), value="alma", inline=True)
+            # embed.set_thumbnail(url="https://imgur.com/HDq0vCg")
+            await ctx.send(embed=embed)
             await play_music(voice)
 
 
