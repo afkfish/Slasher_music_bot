@@ -25,10 +25,11 @@ def search_yt(item):
     with YoutubeDL(YDL_OPTIONS) as ydl:
         try:
             info = ydl.extract_info("ytsearch:%s" % item, download=False)['entries'][0]
+            # print(info)
         except Exception:
             return False
 
-    return {'source': info['formats'][0]['url'], 'title': info['title']}
+    return {'source': info['formats'][0]['url'], 'title': info['title'], 'thumbnail': info['thumbnail'], 'duration': info['duration']}
 
 
 def play_next(vc):
@@ -76,12 +77,13 @@ async def p(ctx, *args):
                 "a livestream format.")
         else:
             music_queue.append([song, voice_channel])
-            # print(music_queue)
+            # print(music_queue[-1])
             # await ctx.send("Song added to queue.")
             embed = discord.Embed(title="Song added to queue", color=0x152875)
             embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
-            embed.add_field(name="{}".format(music_queue[-1][0]['title']), value="alma", inline=True)
-            # embed.set_thumbnail(url="https://imgur.com/HDq0vCg")
+            embed.set_thumbnail(url=music_queue[-1][0]['thumbnail'])
+            embed.add_field(name=music_queue[-1][0]['title'], value=str(music_queue[-1][0]['duration'])+" seconds", inline=True)
+            embed.set_footer(text="Song requested by: "+ctx.author.name)
             await ctx.send(embed=embed)
             await play_music(voice)
 
@@ -94,13 +96,17 @@ async def play(ctx: SlashContext, music: str):
 @bot.command()
 async def q(ctx):
     retval = ""
+    embed = discord.Embed(title="Queue", color=0x152875)
+    embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
     for i in range(0, len(music_queue)):
         retval += music_queue[i][0]['title'] + "\n"
     # print(retval)
     if retval != "":
-        await ctx.send(retval)
+        embed.add_field(name="Songs: ", value=retval, inline=True)
+        await ctx.send(embed=embed)
     else:
-        await ctx.send("No music in queue")
+        embed.add_field(name="Songs: ", value="No music in queue", inline=True)
+        await ctx.send(embed=embed)
 
 
 @slash.slash(name="queue")
