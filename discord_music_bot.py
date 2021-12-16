@@ -35,6 +35,16 @@ async def settings_embed(ctx):
     await ctx.send(embed=embed)
 
 
+def announce_song(ctx, a):
+    embed = discord.Embed(title="Currently playing:", color=0x152875)
+    embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
+    embed.set_thumbnail(url=a[0]['thumbnail'])
+    embed.add_field(name=a[0]['title'],
+                    value=str(dt.timedelta(seconds=int(a[0]['duration']))),
+                    inline=True)
+    bot.loop.create_task(ctx.send(embed=embed))
+
+
 # searching the item on YouTube
 def search_yt(item):
     with YoutubeDL(YDL_OPTIONS) as ydl:
@@ -56,23 +66,11 @@ def play_next(ctx, vc):
             if bot.shuffle:
                 a = random.choice(music_queue)
                 m_url = a[0]['source']
-                embed = discord.Embed(title="Currently playing:", color=0x152875)
-                embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
-                embed.set_thumbnail(url=a[0]['thumbnail'])
-                embed.add_field(name=a[0]['title'],
-                                value=str(dt.timedelta(seconds=int(a[0]['duration']))),
-                                inline=True)
-                ctx.send(embed=embed)
+                announce_song(ctx, a)
                 music_queue.remove(a)
             else:
                 m_url = music_queue[0][0]['source']
-                embed = discord.Embed(title="Currently playing:", color=0x152875)
-                embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
-                embed.set_thumbnail(url=music_queue[0][0]['thumbnail'])
-                embed.add_field(name=music_queue[0][0]['title'],
-                                value=str(dt.timedelta(seconds=int(music_queue[0][0]['duration']))),
-                                inline=True)
-                ctx.send(embed=embed)
+                announce_song(ctx, music_queue[0])
                 music_queue.pop(0)
             vc.play(discord.FFmpegPCMAudio(m_url), after=lambda e: play_next(ctx, vc))
 
@@ -91,13 +89,7 @@ async def play_music(ctx, vc):
         # remove the first element as you are currently playing it
         if not vc.is_playing():
             if bot.announce:
-                embed = discord.Embed(title="Currently playing:", color=0x152875)
-                embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
-                embed.set_thumbnail(url=music_queue[0][0]['thumbnail'])
-                embed.add_field(name=music_queue[0][0]['title'],
-                                value=str(dt.timedelta(seconds=int(music_queue[0][0]['duration']))),
-                                inline=True)
-                await ctx.send(embed=embed)
+                announce_song(ctx, music_queue[0])
             music_queue.pop(0)
             vc.play(discord.FFmpegPCMAudio(m_url), after=lambda e: play_next(ctx, vc))
 
