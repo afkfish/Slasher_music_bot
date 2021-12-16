@@ -116,7 +116,7 @@ async def p(ctx, *args):
             embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
             embed.set_thumbnail(url=music_queue[-1][0]['thumbnail'])
             embed.add_field(name=music_queue[-1][0]['title'],
-                            value=str(dt.timedelta(seconds=int(music_queue[0][0]['duration']))),
+                            value=str(dt.timedelta(seconds=int(music_queue[-1][0]['duration']))),
                             inline=True)
             embed.set_footer(text="Song requested by: "+ctx.author.name)
             await ctx.send(embed=embed)
@@ -155,6 +155,8 @@ async def s(ctx):
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     if voice != "" and voice:
         voice.stop()
+        embed = discord.Embed(title="Skipped")
+        await ctx.send(embed=embed)
         # try to play next in the queue if it exists
         await play_music(ctx, voice)
 
@@ -168,6 +170,8 @@ async def skip(ctx):
 async def pause(ctx):
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     if voice.is_playing():
+        embed = discord.Embed(title="Paused")
+        await ctx.send(embed=embed)
         voice.pause()
 
 
@@ -180,6 +184,8 @@ async def pause_(ctx):
 async def resume(ctx):
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     if voice.is_paused():
+        embed = discord.Embed(title="Resumed")
+        await ctx.send(embed=embed)
         voice.resume()
 
 
@@ -191,6 +197,8 @@ async def resume_(ctx):
 @bot.command()
 async def stop(ctx):
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+    embed = discord.Embed(title="Stopped")
+    await ctx.send(embed=embed)
     voice.stop()
 
 
