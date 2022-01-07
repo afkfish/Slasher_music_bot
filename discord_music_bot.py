@@ -2,7 +2,7 @@ import discord
 import random
 import datetime as dt
 from discord_slash import SlashCommand, SlashContext
-from discord_slash.utils.manage_commands import create_option
+from discord_slash.utils.manage_commands import create_option, create_choice
 from discord.ext import commands
 from youtube_dl import YoutubeDL
 
@@ -15,23 +15,33 @@ bot.remove_command('help')
 # 2d array containing [song, channel]
 music_queue = []
 YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': 'True'}
-FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
+FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+                  'options': '-vn'}
 vc = ""
 bot.shuffle = False
-bot.announce = False
-
-# discord.opus.load_opus()
+bot.announce = True
 
 
 async def settings_embed(ctx):
-    embed = discord.Embed(title="Settings", description="The setting related to the bot", color=0x152875)
-    embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
-    embed.add_field(name="Prefix", value="Currently the prefix is not changable due to lack of "
-                                         "knowledge the developer has", inline=False)
-    embed.add_field(name="Shuffle play", value="Plays the songs shuffled\n"
-                                               "\nEnabled: {}".format(bot.shuffle), inline=True)
-    embed.add_field(name="Announce songs", value="Songs will be announced when played\n"
-                                                 "\nEnabled: {}".format(bot.announce), inline=True)
+    embed = discord.Embed(title="Settings",
+                          description="The setting related to the bot",
+                          color=0x152875)
+    embed.set_author(name="Slasher",
+                     icon_url="https://i.imgur.com/shZLAQk.jpg")
+    embed.add_field(name="Prefix",
+                    value="Currently the prefix is not changable due to lack of "
+                          "knowledge the developer has",
+                    inline=False)
+    embed.add_field(name="Shuffle play :twisted_rightwards_arrows:",
+                    value="Plays the songs shuffled\n\nEnabled: {}".format(
+                        "True :white_check_mark:" if bot.shuffle else "False :x:"
+                    ),
+                    inline=True)
+    embed.add_field(name="Announce songs :mega:",
+                    value="Songs will be announced when played\n\nEnabled: {}".format(
+                        "True :white_check_mark:" if bot.announce else "False :x:"
+                    ),
+                    inline=True)
     await ctx.send(embed=embed)
 
 
@@ -72,7 +82,8 @@ def play_next(ctx, vc):
                 m_url = music_queue[0][0]['source']
                 announce_song(ctx, music_queue[0])
                 music_queue.pop(0)
-            vc.play(discord.FFmpegPCMAudio(m_url), after=lambda e: play_next(ctx, vc))
+            vc.play(discord.FFmpegPCMAudio(options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+                                           source=m_url), after=lambda e: play_next(ctx, vc))
 
 
 # infinite loop checking
@@ -91,12 +102,19 @@ async def play_music(ctx, vc):
             if bot.announce:
                 announce_song(ctx, music_queue[0])
             music_queue.pop(0)
-            vc.play(discord.FFmpegPCMAudio(m_url), after=lambda e: play_next(ctx, vc))
+            vc.play(discord.FFmpegPCMAudio(options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+                                           source=m_url), after=lambda e: play_next(ctx, vc))
 
 
-@bot.command()
-async def p(ctx, *args):
-    query = " ".join(args)
+@slash.slash(name="play", options=[
+    create_option(
+        name="music",
+        description="the music to be played",
+        option_type=3,
+        required=True
+    )], guild_ids=[663825004256952342])
+async def play(ctx, music: str):
+    query = " ".join(music)
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     voice_channel = ctx.author.voice.channel
     if voice_channel is None:
@@ -110,27 +128,19 @@ async def p(ctx, *args):
                 "a livestream format.")
         else:
             music_queue.append([song, voice_channel])
-            # print(music_queue[-1])
-            # await ctx.send("Song added to queue.")
             embed = discord.Embed(title="Song added to queue", color=0x152875)
             embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
             embed.set_thumbnail(url=music_queue[-1][0]['thumbnail'])
             embed.add_field(name=music_queue[-1][0]['title'],
                             value=str(dt.timedelta(seconds=int(music_queue[-1][0]['duration']))),
                             inline=True)
-            embed.set_footer(text="Song requested by: "+ctx.author.name)
+            embed.set_footer(text="Song requested by: " + ctx.author.name)
             await ctx.send(embed=embed)
             await play_music(ctx, voice)
 
 
-@slash.slash(name="play", options=[create_option(name="music", description="the music to be played", option_type=3,
-                                                 required=True)])
-async def play(ctx: SlashContext, music: str):
-    await p(ctx, music)
-
-
-@bot.command()
-async def q(ctx):
+@slash.slash(name="queue", guild_ids=[663825004256952342])
+async def queue(ctx):
     retval = ""
     embed = discord.Embed(title="Queue", color=0x152875)
     embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
@@ -145,43 +155,28 @@ async def q(ctx):
         await ctx.send(embed=embed)
 
 
-@slash.slash(name="queue")
-async def queue(ctx):
-    await q(ctx)
-
-
-@bot.command()
-async def s(ctx):
+@slash.slash(name="skip", guild_ids=[663825004256952342])
+async def skip(ctx):
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     if voice != "" and voice:
         voice.stop()
-        embed = discord.Embed(title="Skipped")
+        embed = discord.Embed(title="Skipped :next_track:")
         await ctx.send(embed=embed)
         # try to play next in the queue if it exists
         await play_music(ctx, voice)
 
 
-@slash.slash(name="skip")
-async def skip(ctx):
-    await s(ctx)
-
-
-@bot.command()
-async def pause(ctx):
+@slash.slash(name="pause", guild_ids=[663825004256952342])
+async def pause_(ctx):
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     if voice.is_playing():
-        embed = discord.Embed(title="Paused")
+        embed = discord.Embed(title="Paused :pause_button:")
         await ctx.send(embed=embed)
         voice.pause()
 
 
-@slash.slash(name="pause")
-async def pause_(ctx):
-    await pause(ctx)
-
-
-@bot.command()
-async def resume(ctx):
+@slash.slash(name="resume", guild_ids=[663825004256952342])
+async def resume_(ctx):
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     if voice.is_paused():
         embed = discord.Embed(title="Resumed")
@@ -189,58 +184,57 @@ async def resume(ctx):
         voice.resume()
 
 
-@slash.slash(name="resume")
-async def resume_(ctx):
-    await resume(ctx)
-
-
-@bot.command()
-async def stop(ctx):
+@slash.slash(name="stop", guild_ids=[663825004256952342])
+async def stop_(ctx):
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-    embed = discord.Embed(title="Stopped")
+    embed = discord.Embed(title="Stopped :stop_button:")
     await ctx.send(embed=embed)
     voice.stop()
 
 
-@slash.slash(name="stop")
-async def stop_(ctx):
-    await stop(ctx)
-
-
-@bot.command()
-async def leave(ctx):
+@slash.slash(name="leave", guild_ids=[663825004256952342])
+async def leave_(ctx):
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     if voice.is_connected():
         await voice.disconnect()
 
 
-@slash.slash(name="leave")
-async def leave_(ctx):
-    await leave(ctx)
+@slash.slash(name="settings", guild_ids=[663825004256952342])
+async def settings_(ctx):
+    await settings_embed(ctx)
 
 
-@bot.command()
-async def settings(ctx, *arg):
-    if len(arg) == 0:
-        await settings_embed(ctx)
-    else:
-        match (arg[1]):
-            case "true":
-                match (arg[0]):
-                    case "shuffle":
-                        bot.shuffle = True
-                    case "announce":
-                        bot.announce = True
-                await settings_embed(ctx)
-            case "false":
-                match (arg[0]):
-                    case "shuffle":
-                        bot.shuffle = False
-                    case "announce":
-                        bot.announce = False
-                await settings_embed(ctx)
-            case _:
-                await settings_embed(ctx)
-# TODO: slash command for settings
+@slash.subcommand(base="settings", name="play", subcommand_group="shuffle", options=[
+    create_option(
+        name="shuffle_play",
+        description=" ",
+        option_type=5,
+        required=True,
+    )
+], guild_ids=[663825004256952342])
+async def settings_shuffle(ctx, **shuffle_play: str):
+    if bool(shuffle_play["shuffle_play"]):
+        bot.shuffle = True
+    elif not bool(shuffle_play["shuffle_play"]):
+        bot.shuffle = False
+    await settings_embed(ctx)
+
+
+@slash.subcommand(base="settings", name="songs", subcommand_group="announce", options=[
+    create_option(
+        name="announce_songs",
+        description=" ",
+        option_type=5,
+        required=True,
+    )
+], guild_ids=[663825004256952342])
+async def settings_announce(ctx, **announce_songs: str):
+    if bool(announce_songs['announce_songs']):
+        bot.announce = True
+    elif not bool(announce_songs['announce_songs']):
+        bot.announce = False
+    await settings_embed(ctx)
+
+
 # start the bot with our token
 bot.run("NzgyODk3NzcxNzQ5MzEwNDg0.X8S4Xg.YV5fFiOvRot6ab-dHKPZUTI6Eb8")
