@@ -58,6 +58,7 @@ class NavigationC(commands.Cog):
         voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         if voice.is_connected():
             await voice.disconnect()
+            await ctx.send("Disconnected!")
 
 
 def setup(bot):

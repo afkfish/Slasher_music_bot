@@ -10,7 +10,6 @@ from discord_slash.utils.manage_commands import create_option
 YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': 'True'}
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
                   'options': '-vn'}
-music_queue = []
 
 
 # searching the item on YouTube
@@ -32,6 +31,7 @@ class PlayC(commands.Cog):
         self.bot = bot
 
     # 2d array containing [song, channel]
+    music_queue = []
 
     def announce_song(self, ctx, a):
         embed = discord.Embed(title="Currently playing:", color=0x152875)
@@ -43,38 +43,40 @@ class PlayC(commands.Cog):
         self.bot.loop.create_task(ctx.send(embed=embed))
 
     def play_next(self, ctx, vc):
-        if len(music_queue) > 0:
+        if len(self.music_queue) > 0:
             # get the first url and
             # remove the selected element as you are currently playing it
             if not vc.is_playing():
                 if main.bot.shuffle:
-                    a = random.choice(music_queue)
+                    a = random.choice(self.music_queue)
                     m_url = a[0]['source']
                     self.announce_song(ctx, a)
-                    music_queue.remove(a)
+                    self.music_queue.remove(a)
                 else:
-                    m_url = music_queue[0][0]['source']
-                    self.announce_song(ctx, music_queue[0])
-                    music_queue.pop(0)
-                vc.play(discord.FFmpegPCMAudio(options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-                                               source=m_url), after=lambda e: self.play_next(ctx, vc))
+                    m_url = self.music_queue[0][0]['source']
+                    self.announce_song(ctx, self.music_queue[0])
+                    self.music_queue.pop(0)
+                if vc.is_connected:
+                    vc.play(discord.FFmpegPCMAudio(options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+                                                   source=m_url), after=lambda e: self.play_next(ctx, vc))
 
     # infinite loop checking
     async def play_music(self, ctx, vc):
-        if len(music_queue) > 0:
-            m_url = music_queue[0][0]['source']
+        if len(self.music_queue) > 0:
+            m_url = self.music_queue[0][0]['source']
             # try to connect to voice channel if you are not already connected
             if vc == "" or vc is None:
-                vc = await music_queue[0][1].connect()
+                vc = await self.music_queue[0][1].connect()
             else:
-                await vc.move_to(music_queue[0][1])
+                await vc.move_to(self.music_queue[0][1])
             # remove the first element as you are currently playing it
             if not vc.is_playing():
                 if main.bot.announce:
-                    self.announce_song(ctx, music_queue[0])
-                music_queue.pop(0)
-                vc.play(discord.FFmpegPCMAudio(options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-                                               source=m_url), after=lambda e: self.play_next(ctx, vc))
+                    self.announce_song(ctx, self.music_queue[0])
+                self.music_queue.pop(0)
+                if vc.is_connected:
+                    vc.play(discord.FFmpegPCMAudio(options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+                                                   source=m_url), after=lambda e: self.play_next(ctx, vc))
 
     @cog_ext.cog_slash(name="play",
                        description="Play a song",
@@ -100,12 +102,12 @@ class PlayC(commands.Cog):
                     "Could not download the song. Incorrect format try another keyword. This could be due to "
                     "playlist or a livestream format.")
             else:
-                music_queue.append([song, voice_channel])
+                self.music_queue.append([song, voice_channel])
                 embed = discord.Embed(title="Song added to queue", color=0x152875)
                 embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
-                embed.set_thumbnail(url=music_queue[-1][0]['thumbnail'])
-                embed.add_field(name=music_queue[-1][0]['title'],
-                                value=str(dt.timedelta(seconds=int(music_queue[-1][0]['duration']))),
+                embed.set_thumbnail(url=self.music_queue[-1][0]['thumbnail'])
+                embed.add_field(name=self.music_queue[-1][0]['title'],
+                                value=str(dt.timedelta(seconds=int(self.music_queue[-1][0]['duration']))),
                                 inline=True)
                 embed.set_footer(text="Song requested by: " + ctx.author.name)
                 await ctx.send(embed=embed)
@@ -118,8 +120,8 @@ class PlayC(commands.Cog):
         retval = ""
         embed = discord.Embed(title="Queue", color=0x152875)
         embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
-        for i in range(0, len(music_queue)):
-            retval += music_queue[i][0]['title'] + "\n"
+        for i in range(0, len(self.music_queue)):
+            retval += self.music_queue[i][0]['title'] + "\n"
         # print(retval)
         if retval != "":
             embed.add_field(name="Songs: ", value=retval, inline=True)
@@ -127,6 +129,13 @@ class PlayC(commands.Cog):
         else:
             embed.add_field(name="Songs: ", value="No music in queue", inline=True)
             await ctx.send(embed=embed)
+
+    @cog_ext.cog_slash(name="rm_d",
+                       description="Removes duplicate songs from queue",
+                       guild_ids=[663825004256952342])
+    async def remove(self, ctx):
+        # self.music_queue = list(dict.fromkeys(self.music_queue))
+        await self.queue(self, ctx)
 
 
 def setup(bot):
