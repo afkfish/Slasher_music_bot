@@ -19,8 +19,9 @@ class NavigationC(commands.Cog):
             embed = discord.Embed(title="Skipped :next_track:")
             await ctx.send(embed=embed)
             # try to play next in the queue if it exists
-            obj = play.PlayC(commands.Cog)
-            await obj.play_music(ctx, voice)
+            if voice.is_playing():
+                obj = play.PlayC(commands.Cog)
+                await obj.play_music(ctx, voice)
 
     @cog_ext.cog_slash(name="pause",
                        description="Pause the song",

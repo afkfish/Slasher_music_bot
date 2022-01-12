@@ -88,8 +88,8 @@ class PlayC(commands.Cog):
                                required=True
                            )],
                        guild_ids=[663825004256952342])
-    async def play(self, ctx, music: str):
-        query = " ".join(music)
+    async def play(self, ctx, music):
+        query = "".join(music)
         voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         voice_channel = ctx.author.voice.channel
         if voice_channel is None:
