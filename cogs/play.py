@@ -1,5 +1,6 @@
 import discord
 import random
+import json
 import datetime as dt
 from youtube_dl import YoutubeDL
 from discord.ext import commands
@@ -10,6 +11,7 @@ from discord_slash.utils.manage_commands import create_option
 YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': 'True'}
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
                   'options': '-vn'}
+JSON_FORMAT = {'name': '', 'songs': []}
 
 
 # searching the item on YouTube
@@ -97,7 +99,7 @@ class PlayC(commands.Cog):
             await ctx.send("Connect to a voice channel!")
         else:
             song = search_yt(query)
-            if type(song) == type(True):
+            if song is False:
                 await ctx.send(
                     "Could not download the song. Incorrect format try another keyword. This could be due to "
                     "playlist or a livestream format.")
@@ -136,6 +138,70 @@ class PlayC(commands.Cog):
     async def remove(self, ctx):
         # self.music_queue = list(dict.fromkeys(self.music_queue))
         await self.queue(self, ctx)
+
+    @cog_ext.cog_slash(name="createpl",
+                       description="Create playlists",
+                       options=[
+                           create_option(name="name",
+                                         description=" ",
+                                         option_type=3,
+                                         required=True)
+                       ],
+                       guild_ids=[663825004256952342])
+    async def createplaylist(self, ctx, name):
+        JSON_FORMAT['name'] = name
+        with open("./playlists/{}.json".format(name), "w") as f:
+            json.dump(JSON_FORMAT, f, indent=4)
+        f.close()
+        await ctx.send("Playlis {} was succefully created".format(name))
+
+    @cog_ext.cog_slash(name="addsong",
+                       description="Append a song to existing playlists",
+                       options=[
+                           create_option(name="playlist",
+                                         description="the destination playlist",
+                                         option_type=3,
+                                         required=True),
+                           create_option(name="song",
+                                         description="the song's URL",
+                                         option_type=3,
+                                         required=True)
+                       ],
+                       guild_ids=[663825004256952342])
+    async def addsong(self, ctx, playlist, song):
+        with open("./playlists/{}.json".format(playlist), "r") as a:
+            data = json.load(a)
+        data['songs'].append(song)
+        with open("./playlists/{}.json".format(playlist), "w") as f:
+            json.dump(data, f, indent=4)
+        await ctx.send("Song was successfully added!")
+
+    @cog_ext.cog_slash(name="playlist",
+                       description="Play songs from a playlist",
+                       options=[
+                           create_option(name="playlist_name",
+                                         description="the name of the playlist",
+                                         option_type=3,
+                                         required=True)
+                       ],
+                       guild_ids=[663825004256952342])
+    async def playlist(self, ctx, playlist_name):
+        with open("./playlists/{}.json".format(playlist_name), "r") as f:
+            data = json.load(f)
+        for item in data['songs']:
+            vc = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+            voice_channel = ctx.author.voice.channel
+            if voice_channel is None:
+                await ctx.send("Connect to a voice channel!")
+            else:
+                song = search_yt(item)
+                print(item)
+                if song is False:
+                    await ctx.send("Could not play the song from the playlist.")
+                else:
+                    self.music_queue.append([song, voice_channel])
+                    await self.play_music(ctx, vc)
+        await ctx.send("Playlist succefully loaded!")
 
 
 def setup(bot):
