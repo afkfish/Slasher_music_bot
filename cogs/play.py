@@ -53,10 +53,12 @@ class PlayC(commands.Cog):
                     a = random.choice(self.music_queue)
                     m_url = a[0]['source']
                     self.announce_song(ctx, a)
+                    main.bot.playing = a
                     self.music_queue.remove(a)
                 else:
                     m_url = self.music_queue[0][0]['source']
                     self.announce_song(ctx, self.music_queue[0])
+                    main.bot.playing = self.music_queue[0]
                     self.music_queue.pop(0)
                 if vc.is_connected:
                     vc.play(discord.FFmpegPCMAudio(options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
@@ -75,6 +77,7 @@ class PlayC(commands.Cog):
             if not vc.is_playing():
                 if main.bot.announce:
                     self.announce_song(ctx, self.music_queue[0])
+                main.bot.playing = self.music_queue[0]
                 self.music_queue.pop(0)
                 if vc.is_connected:
                     vc.play(discord.FFmpegPCMAudio(options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
@@ -202,6 +205,12 @@ class PlayC(commands.Cog):
                     self.music_queue.append([song, voice_channel])
                     await self.play_music(ctx, vc)
         await ctx.send("Playlist succefully loaded!")
+
+    @cog_ext.cog_slash(name="np",
+                       description="The song that is currently being played",
+                       guild_ids=[663825004256952342])
+    async def np(self, ctx):
+        self.announce_song(ctx, main.bot.playing)
 
 
 def setup(bot):

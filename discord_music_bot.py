@@ -8,7 +8,8 @@ slash = SlashCommand(bot, sync_commands=True)
 bot.remove_command('help')
 
 bot.shuffle = False
-bot.announce = True
+bot.announce = False
+bot.playing = ""
 
 
 @slash.slash(name="load",
@@ -57,5 +58,3 @@ for filename in os.listdir('./cogs'):
 
 # start the bot with our token
 bot.run("NzgyODk3NzcxNzQ5MzEwNDg0.X8S4Xg.YV5fFiOvRot6ab-dHKPZUTI6Eb8")
-
-# TODO guild id management system
