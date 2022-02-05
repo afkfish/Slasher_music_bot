@@ -28,7 +28,7 @@ async def settings_embed(ctx):
     await ctx.send(embed=embed)
 
 
-class SettingsC(commands.Cog):
+class Settings(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
@@ -80,4 +80,4 @@ class SettingsC(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(SettingsC(bot))
+    bot.add_cog(Settings(bot))

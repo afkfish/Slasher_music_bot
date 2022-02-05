@@ -1,4 +1,3 @@
-import os
 import discord
 from discord_slash import SlashCommand
 from discord.ext import commands
@@ -6,8 +5,13 @@ from discord.ext import commands
 bot = commands.Bot(command_prefix='>')
 slash = SlashCommand(bot, sync_commands=True)
 
-bot.remove_command('help')
+# bot.remove_command('help')
 
+modules = [
+    'navigation',
+    'play',
+    'settings'
+]
 bot.shuffle = False
 bot.announce = False
 bot.playing = ""
@@ -22,24 +26,6 @@ async def on_ready():
         bot.guild_ids.append(guild.id)
 
 
-@slash.slash(name="queue",
-             description="Displays the songs in the queue",
-             guild_ids=bot.guild_ids)
-async def queue(ctx):
-    retval = ""
-    embed = discord.Embed(title="Queue", color=0x152875)
-    embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
-    for i in range(0, len(bot.music_queue)):
-        retval += bot.music_queue[i][0]['title'] + "\n"
-    # print(retval)
-    if retval != "":
-        embed.add_field(name="Songs: ", value=retval, inline=True)
-        await ctx.send(embed=embed)
-    else:
-        embed.add_field(name="Songs: ", value="No music in queue", inline=True)
-        await ctx.send(embed=embed)
-
-
 @slash.slash(name="load",
              description="Load cogs",
              guild_ids=bot.guild_ids)
@@ -47,7 +33,8 @@ async def load(ctx, extension):
     try:
         bot.load_extension(f'cogs.{extension}')
         await ctx.send("Succefully loaded {}".format(extension))
-    except ValueError:
+    except Exception as ex:
+        print('Failed to load mod {0}\n{1}: {2}'.format(cog, type(ex).__name__, ex))
         await ctx.send("Loading {} was unsuccesful".format(extension))
 
 
@@ -58,7 +45,8 @@ async def unload(ctx, extension):
     try:
         bot.unload_extension(f'cogs.{extension}')
         await ctx.send("Succefully unloaded {}".format(extension))
-    except ValueError:
+    except Exception as ex:
+        print('Failed to load mod {0}\n{1}: {2}'.format(cog, type(ex).__name__, ex))
         await ctx.send("Unloading {} was unsuccesful".format(extension))
 
 
@@ -70,7 +58,8 @@ async def reload(ctx, extension):
         bot.unload_extension(f'cogs.{extension}')
         bot.load_extension(f'cogs.{extension}')
         await ctx.send("Succefully reloaded {}".format(extension))
-    except ValueError:
+    except Exception as ex:
+        print('Failed to load mod {0}\n{1}: {2}'.format(cog, type(ex).__name__, ex))
         await ctx.send("Reloading {} was unsuccesful".format(extension))
 
 
@@ -81,9 +70,11 @@ async def ping(ctx):
     await ctx.send(f"Pong! {round(bot.latency * 1000)}ms")
 
 
-for filename in os.listdir('./cogs'):
-    if filename.endswith('.py'):
-        bot.load_extension(f'cogs.{filename[:-3]}')
+for cog in modules:
+    try:
+        bot.load_extension(f'cogs.{cog}')
+    except Exception as e:
+        print('Failed to load mod {0}\n{1}: {2}'.format(cog, type(e).__name__, e))
 
 # start the bot with our token
 bot.run("NzgyODk3NzcxNzQ5MzEwNDg0.X8S4Xg.YV5fFiOvRot6ab-dHKPZUTI6Eb8")

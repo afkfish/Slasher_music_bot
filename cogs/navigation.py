@@ -1,11 +1,12 @@
 import discord
-import cogs.play as play
-import discord_music_bot as main
 from discord.ext import commands
 from discord_slash import cog_ext
 
+import discord_music_bot as main
+from cogs.play import Play
 
-class NavigationC(commands.Cog):
+
+class Navigation(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
@@ -21,7 +22,7 @@ class NavigationC(commands.Cog):
             await ctx.send(embed=embed)
             # try to play next in the queue if it exists
             if voice.is_playing():
-                obj = play.PlayC(commands.Cog)
+                obj = Play(commands.Cog)
                 await obj.play_music(ctx, voice)
 
     @cog_ext.cog_slash(name="pause",
@@ -66,7 +67,7 @@ class NavigationC(commands.Cog):
                        description="clear",
                        guild_ids=main.bot.guild_ids)
     async def clear(self, ctx):
-        print()
+        await ctx.send("")
 
     @cog_ext.cog_subcommand(base="clear",
                             name="duplicates",
@@ -78,7 +79,14 @@ class NavigationC(commands.Cog):
                 for j in range(len(main.bot.music_queue)):
                     if main.bot.music_queue[i][0]['title'] == main.bot.music_queue[j][0]['title'] and i != j:
                         main.bot.music_queue.remove(main.bot.music_queue[i])
-        await ctx.send("Duplicates cleared!")
+        embed = discord.Embed(title="Duplicated songs cleared! :broom:", color=0x152875)
+        embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
+        songs = Play.slist()
+        if songs != "":
+            embed.add_field(name="Songs: ", value=songs, inline=True)
+        else:
+            embed.add_field(name="Songs: ", value="No music in queue", inline=True)
+        await ctx.send(embed=embed)
 
     @cog_ext.cog_subcommand(base="clear",
                             name="all",
@@ -87,8 +95,9 @@ class NavigationC(commands.Cog):
     async def clear_all(self, ctx):
         if main.bot.music_queue:
             main.bot.music_queue = []
-        await ctx.send("Queue cleared!")
+        embed = discord.Embed(title="Queue cleared! :broom:", color=0x152875)
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
-    bot.add_cog(NavigationC(bot))
+    bot.add_cog(Navigation(bot))

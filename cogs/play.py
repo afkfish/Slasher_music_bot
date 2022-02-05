@@ -27,10 +27,17 @@ def search_yt(item):
             'duration': info['duration']}
 
 
-class PlayC(commands.Cog):
+class Play(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+
+    @staticmethod
+    def slist():
+        slist = ""
+        for song in main.bot.music_queue:
+            slist += song[0]['title'] + "\n"
+        return slist
 
     def announce_song(self, ctx, a):
         embed = discord.Embed(title="Currently playing:", color=0x152875)
@@ -115,6 +122,19 @@ class PlayC(commands.Cog):
                 await ctx.send(embed=embed)
                 await self.play_music(ctx, voice)
 
+    @cog_ext.cog_slash(name="queue",
+                       description="Displays the songs in the queue",
+                       guild_ids=main.bot.guild_ids)
+    async def queue(self, ctx):
+        embed = discord.Embed(title="Queue", color=0x152875)
+        embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
+        songs = self.slist()
+        if songs != "":
+            embed.add_field(name="Songs: ", value=songs, inline=True)
+        else:
+            embed.add_field(name="Songs: ", value="No music in queue", inline=True)
+        await ctx.send(embed=embed)
+
     @cog_ext.cog_slash(name="createpl",
                        description="Create playlists",
                        options=[
@@ -187,4 +207,4 @@ class PlayC(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(PlayC(bot))
+    bot.add_cog(Play(bot))
