@@ -1,4 +1,5 @@
 import discord
+import json
 from discord_slash import SlashCommand
 from discord.ext import commands
 
@@ -12,18 +13,46 @@ modules = [
     'play',
     'settings'
 ]
-bot.shuffle = False
-bot.announce = False
-bot.playing = ""
-# 2d array containing [song, channel]
-bot.music_queue = []
+
+
+def bot_shuffle(guildid):
+    with open('./settings/settings.json', 'r') as f:
+        data = json.load(f)
+    return bool(data[str(guildid)]['shuffle'])
+
+
+def bot_announce(guildid):
+    with open('./settings/settings.json', 'r') as f:
+        data = json.load(f)
+    return bool(data[str(guildid)]['announce'])
+
+
+bot.playing = {}
+bot.music_queue = {}
 bot.guild_ids = []
 
 
 @bot.event
 async def on_ready():
+    with open('./settings/settings.json', 'r') as f:
+        data = json.load(f)
     for guild in bot.guilds:
+        data.update({str(guild.id): {}})
         bot.guild_ids.append(guild.id)
+        bot.music_queue[guild.id] = []
+        bot.playing[guild.id] = ''
+
+
+@bot.event
+async def on_guid_join(guild):
+    with open('./settings/settings.json', 'r') as f:
+        data = json.load(f)
+    data.update({str(guild.id): {'announce': False, 'shuffle': False}})
+    bot.guild_ids.append(guild.id)
+    bot.music_queue[guild.id] = []
+    bot.playing[guild.id] = ''
+    with open('./settings/settings.json', 'w') as f:
+        json.dump(data, f, indent=4)
 
 
 @slash.slash(name="load",

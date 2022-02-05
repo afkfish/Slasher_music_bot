@@ -74,14 +74,14 @@ class Navigation(commands.Cog):
                             description="Clear duplicated songs from queue.",
                             guild_ids=main.bot.guild_ids)
     async def clear_dup(self, ctx):
-        if main.bot.music_queue:
-            for i in range(len(main.bot.music_queue)):
-                for j in range(len(main.bot.music_queue)):
-                    if main.bot.music_queue[i][0]['title'] == main.bot.music_queue[j][0]['title'] and i != j:
-                        main.bot.music_queue.remove(main.bot.music_queue[i])
+        if main.bot.music_queue[ctx.guild.id]:
+            for i in range(len(main.bot.music_queue[ctx.guild.id])):
+                for j in range(len(main.bot.music_queue[ctx.guild.id])):
+                    if main.bot.music_queue[ctx.guild.id][i][0]['title'] == main.bot.music_queue[ctx.guild.id][j][0]['title'] and i != j:
+                        main.bot.music_queue[ctx.guild.id].remove(main.bot.music_queue[ctx.guild.id][i])
         embed = discord.Embed(title="Duplicated songs cleared! :broom:", color=0x152875)
         embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
-        songs = Play.slist()
+        songs = Play.slist(ctx)
         if songs != "":
             embed.add_field(name="Songs: ", value=songs, inline=True)
         else:
@@ -93,8 +93,8 @@ class Navigation(commands.Cog):
                             description="Clear all songs from queue.",
                             guild_ids=main.bot.guild_ids)
     async def clear_all(self, ctx):
-        if main.bot.music_queue:
-            main.bot.music_queue = []
+        if main.bot.music_queue[ctx.guild.id]:
+            main.bot.music_queue[ctx.guild.id] = []
         embed = discord.Embed(title="Queue cleared! :broom:", color=0x152875)
         await ctx.send(embed=embed)
 

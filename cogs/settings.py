@@ -1,4 +1,5 @@
 import discord
+import json
 import discord_music_bot as main
 from discord.ext import commands
 from discord_slash import cog_ext
@@ -17,12 +18,12 @@ async def settings_embed(ctx):
                     inline=False)
     embed.add_field(name="Shuffle play :twisted_rightwards_arrows:",
                     value="Plays the songs shuffled\n\nEnabled: {}".format(
-                        "True :white_check_mark:" if main.bot.shuffle else "False :x:"
+                        "True :white_check_mark:" if main.bot_shuffle(ctx.guild.id) else "False :x:"
                     ),
                     inline=True)
     embed.add_field(name="Announce songs :mega:",
                     value="Songs will be announced when played\n\nEnabled: {}".format(
-                        "True :white_check_mark:" if main.bot.announce else "False :x:"
+                        "True :white_check_mark:" if main.bot_announce(ctx.guild.id) else "False :x:"
                     ),
                     inline=True)
     await ctx.send(embed=embed)
@@ -52,10 +53,14 @@ class Settings(commands.Cog):
                             ],
                             guild_ids=main.bot.guild_ids)
     async def settings_shuffle(self, ctx, **shuffle_play: str):
+        with open('./settings/settings.json', 'r') as f:
+            data = json.load(f)
         if bool(shuffle_play["shuffle_play"]):
-            main.bot.shuffle = True
+            data[str(ctx.guild.id)]['shuffle'] = True
         elif not bool(shuffle_play["shuffle_play"]):
-            main.bot.shuffle = False
+            data[str(ctx.guild.id)]['shuffle'] = False
+        with open('./settings/settings.json', 'w') as f:
+            json.dump(data, f, indent=4)
         await settings_embed(ctx)
 
     @cog_ext.cog_subcommand(base="settings",
@@ -72,10 +77,14 @@ class Settings(commands.Cog):
                             ],
                             guild_ids=main.bot.guild_ids)
     async def settings_announce(self, ctx, **announce_songs: str):
+        with open('./settings/settings.json', 'r') as f:
+            data = json.load(f)
         if bool(announce_songs['announce_songs']):
-            main.bot.announce = True
+            data[str(ctx.guild.id)]['announce'] = True
         elif not bool(announce_songs['announce_songs']):
-            main.bot.announce = False
+            data[str(ctx.guild.id)]['announce'] = False
+        with open('./settings/settings.json', 'w') as f:
+            json.dump(data, f, indent=4)
         await settings_embed(ctx)
 
 

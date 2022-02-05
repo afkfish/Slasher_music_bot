@@ -33,9 +33,9 @@ class Play(commands.Cog):
         self.bot = bot
 
     @staticmethod
-    def slist():
+    def slist(ctx):
         slist = ""
-        for song in main.bot.music_queue:
+        for song in main.bot.music_queue[ctx.guild.id]:
             slist += song[0]['title'] + "\n"
         return slist
 
@@ -49,40 +49,42 @@ class Play(commands.Cog):
         self.bot.loop.create_task(ctx.send(embed=embed))
 
     def play_next(self, ctx, vc):
-        if len(main.bot.music_queue) > 0:
+        if len(main.bot.music_queue[ctx.guild.id]) > 0:
             # get the first url and
             # remove the selected element as you are currently playing it
             if not vc.is_playing():
-                if main.bot.shuffle:
-                    a = random.choice(main.bot.music_queue)
+                if main.bot_shuffle(ctx.guild.id):
+                    a = random.choice(main.bot.music_queue[ctx.guild.id])
                     m_url = a[0]['source']
-                    self.announce_song(ctx, a)
-                    main.bot.playing = a
-                    main.bot.music_queue.remove(a)
+                    if main.bot_announce(ctx.guild.id):
+                        self.announce_song(ctx, a)
+                    main.bot.playing[ctx.guild.id] = a
+                    main.bot.music_queue[ctx.guild.id].remove(a)
                 else:
-                    m_url = main.bot.music_queue[0][0]['source']
-                    self.announce_song(ctx, main.bot.music_queue[0])
-                    main.bot.playing = main.bot.music_queue[0]
-                    main.bot.music_queue.pop(0)
+                    m_url = main.bot.music_queue[ctx.guild.id][0][0]['source']
+                    if main.bot_announce(ctx.guild.id):
+                        self.announce_song(ctx, main.bot.music_queue[ctx.guild.id][0])
+                    main.bot.playing[ctx.guild.id] = main.bot.music_queue[ctx.guild.id][0]
+                    main.bot.music_queue[ctx.guild.id].pop(0)
                 if vc.is_connected:
                     vc.play(discord.FFmpegPCMAudio(options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
                                                    source=m_url), after=lambda e: self.play_next(ctx, vc))
 
     # infinite loop checking
     async def play_music(self, ctx, vc):
-        if len(main.bot.music_queue) > 0:
-            m_url = main.bot.music_queue[0][0]['source']
+        if len(main.bot.music_queue[ctx.guild.id]) > 0:
+            m_url = main.bot.music_queue[ctx.guild.id][0][0]['source']
             # try to connect to voice channel if you are not already connected
             if vc == "" or vc is None:
-                vc = await main.bot.music_queue[0][1].connect()
+                vc = await main.bot.music_queue[ctx.guild.id][0][1].connect()
             else:
-                await vc.move_to(main.bot.music_queue[0][1])
+                await vc.move_to(main.bot.music_queue[ctx.guild.id][0][1])
             # remove the first element as you are currently playing it
             if not vc.is_playing():
-                if main.bot.announce:
-                    self.announce_song(ctx, main.bot.music_queue[0])
-                main.bot.playing = main.bot.music_queue[0]
-                main.bot.music_queue.pop(0)
+                if main.bot_announce(ctx.guild.id):
+                    self.announce_song(ctx, main.bot.music_queue[ctx.guild.id][0])
+                main.bot.playing[ctx.guild.id] = main.bot.music_queue[ctx.guild.id][0]
+                main.bot.music_queue[ctx.guild.id].pop(0)
                 if vc.is_connected:
                     vc.play(discord.FFmpegPCMAudio(options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
                                                    source=m_url), after=lambda e: self.play_next(ctx, vc))
@@ -111,12 +113,13 @@ class Play(commands.Cog):
                     "Could not download the song. Incorrect format try another keyword. This could be due to "
                     "playlist or a livestream format.")
             else:
-                main.bot.music_queue.append([song, voice_channel])
+                main.bot.music_queue[ctx.guild.id].append([song, voice_channel])
                 embed = discord.Embed(title="Song added to queue", color=0x152875)
                 embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
-                embed.set_thumbnail(url=main.bot.music_queue[-1][0]['thumbnail'])
-                embed.add_field(name=main.bot.music_queue[-1][0]['title'],
-                                value=str(dt.timedelta(seconds=int(main.bot.music_queue[-1][0]['duration']))),
+                embed.set_thumbnail(url=main.bot.music_queue[ctx.guild.id][-1][0]['thumbnail'])
+                embed.add_field(name=main.bot.music_queue[ctx.guild.id][-1][0]['title'],
+                                value=str(dt.timedelta(
+                                    seconds=int(main.bot.music_queue[ctx.guild.id][-1][0]['duration']))),
                                 inline=True)
                 embed.set_footer(text="Song requested by: " + ctx.author.name)
                 await ctx.send(embed=embed)
@@ -128,7 +131,7 @@ class Play(commands.Cog):
     async def queue(self, ctx):
         embed = discord.Embed(title="Queue", color=0x152875)
         embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
-        songs = self.slist()
+        songs = self.slist(ctx)
         if songs != "":
             embed.add_field(name="Songs: ", value=songs, inline=True)
         else:
@@ -203,7 +206,7 @@ class Play(commands.Cog):
                        description="The song that is currently being played",
                        guild_ids=main.bot.guild_ids)
     async def np(self, ctx):
-        self.announce_song(ctx, main.bot.playing)
+        self.announce_song(ctx, main.bot.playing[ctx.guild.id])
 
 
 def setup(bot):
