@@ -19,3 +19,7 @@ It requires:
 - /ping
 - /settings announce songs
 - /settings shuffle play
+- /np (now playing)
+- /queue
+- /clear all
+- /clear duplicates
