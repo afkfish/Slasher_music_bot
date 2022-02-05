@@ -28,13 +28,13 @@ async def settings_embed(ctx):
     await ctx.send(embed=embed)
 
 
-class SettingsC(commands.Cog):
+class Settings(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
 
     @cog_ext.cog_slash(name="settings",
-                       guild_ids=[663825004256952342])
+                       guild_ids=main.bot.guild_ids)
     async def settings_(self, ctx):
         await settings_embed(ctx)
 
@@ -50,7 +50,7 @@ class SettingsC(commands.Cog):
                                     required=True,
                                 )
                             ],
-                            guild_ids=[663825004256952342])
+                            guild_ids=main.bot.guild_ids)
     async def settings_shuffle(self, ctx, **shuffle_play: str):
         if bool(shuffle_play["shuffle_play"]):
             main.bot.shuffle = True
@@ -70,7 +70,7 @@ class SettingsC(commands.Cog):
                                     required=True,
                                 )
                             ],
-                            guild_ids=[663825004256952342])
+                            guild_ids=main.bot.guild_ids)
     async def settings_announce(self, ctx, **announce_songs: str):
         if bool(announce_songs['announce_songs']):
             main.bot.announce = True
@@ -80,4 +80,4 @@ class SettingsC(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(SettingsC(bot))
+    bot.add_cog(Settings(bot))
