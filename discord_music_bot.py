@@ -11,7 +11,8 @@ slash = SlashCommand(bot, sync_commands=True)
 modules = [
     'navigation',
     'play',
-    'settings'
+    'settings',
+    'spotify'
 ]
 
 
