@@ -1,14 +1,12 @@
 import discord
 import spotipy
 import discord_music_bot as main
+import datetime as dt
 from cogs.play import search_yt, Play
 from discord.ext import commands
 from discord_slash import cog_ext
 from spotipy.oauth2 import SpotifyClientCredentials
 from discord_slash.utils.manage_commands import create_option
-
-sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id="5502a94b155b49df98eab85103ac811b",
-                                                           client_secret="f228ab2757214c8bbb69c510a8f80040"))
 
 
 class Spotify(commands.Cog):
@@ -26,7 +24,9 @@ class Spotify(commands.Cog):
                        ],
                        guild_ids=main.bot.guild_ids)
     async def spotify(self, ctx, music):
-        embed = discord.Embed(title="Spotify search",
+        sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id="5502a94b155b49df98eab85103ac811b",
+                                                                   client_secret="f228ab2757214c8bbb69c510a8f80040"))
+        embed = discord.Embed(title="Song added to queue from Spotify",
                               color=0x152875)
         embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
         artists = ""
@@ -38,7 +38,9 @@ class Spotify(commands.Cog):
                 artists += "".join("{}, ".format(artist['name']))
             artists = artists[:-2]
             embed.set_thumbnail(url=song['album']['images'][0]['url'])
-            embed.add_field(name="Song:", value="{}\n\n{}".format(song['album']['name'], artists))
+            embed.add_field(name="{}\n\n".format(song['name']),
+                            value="{}\n{}".format(artists, str(dt.timedelta(
+                                seconds=int(int(song['duration_ms'])/1000)))))
             query = "{}\n{}".format(song['album']['name'], artists)
         else:
             song = sp.search(q=music, limit=1, type="track")
@@ -46,7 +48,9 @@ class Spotify(commands.Cog):
                 artists += "".join("{}, ".format(artist['name']))
             artists = artists[:-2]
             embed.set_thumbnail(url=song['tracks']['items'][0]['album']['images'][0]['url'])
-            embed.add_field(name="Song:", value="{}\n\n{}".format(song['tracks']['items'][0]['name'], artists))
+            embed.add_field(name="{}\n\n".format(song['tracks']['items'][0]['name']),
+                            value="{}\n{}".format(artists, str(dt.timedelta(
+                                seconds=int(int(song['tracks']['items'][0]['duration_ms'])/1000)))))
             query = "{}  {}".format(song['tracks']['items'][0]['name'], artists)
         embed.set_footer(text="Song requested by: " + ctx.author.name)
         voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)

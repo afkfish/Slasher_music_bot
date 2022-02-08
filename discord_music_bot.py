@@ -35,13 +35,17 @@ bot.guild_ids = []
 
 @bot.event
 async def on_ready():
+    print("ready")
     with open('./settings/settings.json', 'r') as f:
         data = json.load(f)
     for guild in bot.guilds:
-        data.update({str(guild.id): {}})
+        if guild.id not in data:
+            data.update({str(guild.id): {'announce': False, 'shuffle': False}})
         bot.guild_ids.append(guild.id)
         bot.music_queue[guild.id] = []
         bot.playing[guild.id] = ''
+    with open('./settings/settings.json', 'w') as f:
+        json.dump(data, f, indent=4)
 
 
 @bot.event
@@ -58,31 +62,31 @@ async def on_guid_join(guild):
 
 @slash.slash(name="load",
              description="Load cogs",
-             guild_ids=bot.guild_ids)
+             guild_ids=[940575531567546369])
 async def load(ctx, extension):
     try:
         bot.load_extension(f'cogs.{extension}')
         await ctx.send("Succefully loaded {}".format(extension))
     except Exception as ex:
         print('Failed to load mod {0}\n{1}: {2}'.format(cog, type(ex).__name__, ex))
-        await ctx.send("Loading {} was unsuccesful".format(extension))
+        await ctx.send("Reloading {} was unsuccesful\nError: {}\n{}: {}".format(extension, cog, type(ex).__name__, ex))
 
 
 @slash.slash(name="unload",
              description="Unload cogs",
-             guild_ids=bot.guild_ids)
+             guild_ids=[940575531567546369])
 async def unload(ctx, extension):
     try:
         bot.unload_extension(f'cogs.{extension}')
         await ctx.send("Succefully unloaded {}".format(extension))
     except Exception as ex:
         print('Failed to load mod {0}\n{1}: {2}'.format(cog, type(ex).__name__, ex))
-        await ctx.send("Unloading {} was unsuccesful".format(extension))
+        await ctx.send("Reloading {} was unsuccesful\nError: {}\n{}: {}".format(extension, cog, type(ex).__name__, ex))
 
 
 @slash.slash(name="reload",
              description="Reload cogs",
-             guild_ids=bot.guild_ids)
+             guild_ids=[940575531567546369])
 async def reload(ctx, extension):
     try:
         bot.unload_extension(f'cogs.{extension}')
@@ -90,7 +94,7 @@ async def reload(ctx, extension):
         await ctx.send("Succefully reloaded {}".format(extension))
     except Exception as ex:
         print('Failed to load mod {0}\n{1}: {2}'.format(cog, type(ex).__name__, ex))
-        await ctx.send("Reloading {} was unsuccesful".format(extension))
+        await ctx.send("Reloading {} was unsuccesful\nError: {}\n{}: {}".format(extension, cog, type(ex).__name__, ex))
 
 
 @slash.slash(name="ping",

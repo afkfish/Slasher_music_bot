@@ -2,13 +2,15 @@ import discord
 import random
 import json
 import datetime as dt
+import youtube_transcript_api
 from youtube_dl import YoutubeDL
 from discord.ext import commands
 from discord_slash import cog_ext
 import discord_music_bot as main
+from youtube_transcript_api import YouTubeTranscriptApi
 from discord_slash.utils.manage_commands import create_option
 
-YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': 'True'}
+YDL_OPTIONS = {"format": "bestaudio", "noplaylist": True}
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
                   'options': '-vn'}
 JSON_FORMAT = {'name': '', 'songs': []}
@@ -24,7 +26,7 @@ def search_yt(item):
             return False
 
     return {'source': info['formats'][0]['url'], 'title': info['title'], 'thumbnail': info['thumbnail'],
-            'duration': info['duration']}
+            'duration': info['duration'], 'id': info['id']}
 
 
 class Play(commands.Cog):
@@ -67,7 +69,8 @@ class Play(commands.Cog):
                     main.bot.playing[ctx.guild.id] = main.bot.music_queue[ctx.guild.id][0]
                     main.bot.music_queue[ctx.guild.id].pop(0)
                 if vc.is_connected:
-                    vc.play(discord.FFmpegPCMAudio(options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+                    vc.play(discord.FFmpegPCMAudio(before_options='-reconnect 1 -reconnect_streamed 1 '
+                                                                  '-reconnect_delay_max 5',
                                                    source=m_url), after=lambda e: self.play_next(ctx, vc))
 
     # infinite loop checking
@@ -86,7 +89,8 @@ class Play(commands.Cog):
                 main.bot.playing[ctx.guild.id] = main.bot.music_queue[ctx.guild.id][0]
                 main.bot.music_queue[ctx.guild.id].pop(0)
                 if vc.is_connected:
-                    vc.play(discord.FFmpegPCMAudio(options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+                    vc.play(discord.FFmpegPCMAudio(before_options='-reconnect 1 -reconnect_streamed 1 '
+                                                                  '-reconnect_delay_max 5',
                                                    source=m_url), after=lambda e: self.play_next(ctx, vc))
 
     @cog_ext.cog_slash(name="play",
@@ -207,6 +211,23 @@ class Play(commands.Cog):
                        guild_ids=main.bot.guild_ids)
     async def np(self, ctx):
         self.announce_song(ctx, main.bot.playing[ctx.guild.id])
+
+    @cog_ext.cog_slash(name="lyrics",
+                       description="get the video lyrics",
+                       guild_ids=main.bot.guild_ids)
+    async def lyrics(self, ctx):
+        try:
+            lyric = YouTubeTranscriptApi.get_transcripts(video_ids=[main.bot.playing[ctx.guild.id][0]['id']],
+                                                         languages=['en'])
+            formatted = "```"
+            for text in lyric[0][main.bot.playing[ctx.guild.id][0]['id']]:
+                formatted += text['text']+"\n"
+            formatted += "```"
+            await ctx.send("Lyrics:")
+            await ctx.send(formatted)
+        except youtube_transcript_api._errors.TranscriptsDisabled as e:
+            print("{}".format(type(e).__name__, e))
+            await ctx.send("Couldn't find lyrics!")
 
 
 def setup(bot):
