@@ -46,7 +46,7 @@ class Settings(commands.Cog):
                             options=[
                                 create_option(
                                     name="shuffle_play",
-                                    description=" ",
+                                    description="boolean option",
                                     option_type=5,
                                     required=True,
                                 )
@@ -70,7 +70,7 @@ class Settings(commands.Cog):
                             options=[
                                 create_option(
                                     name="announce_songs",
-                                    description=" ",
+                                    description="boolean option",
                                     option_type=5,
                                     required=True,
                                 )

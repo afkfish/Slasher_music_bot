@@ -8,6 +8,9 @@ slash = SlashCommand(bot, sync_commands=True)
 
 # bot.remove_command('help')
 
+with open("secrets.json", "r") as file:
+    application_key = json.load(file)["discord"]["app_key"]
+
 modules = [
     'navigation',
     'play',
@@ -110,5 +113,5 @@ for cog in modules:
     except Exception as e:
         print('Failed to load mod {0}\n{1}: {2}'.format(cog, type(e).__name__, e))
 
-# start the bot with our token
-bot.run("NzgyODk3NzcxNzQ5MzEwNDg0.X8S4Xg.YV5fFiOvRot6ab-dHKPZUTI6Eb8")
+# start the bot with token
+bot.run(application_key)

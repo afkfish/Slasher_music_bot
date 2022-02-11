@@ -146,7 +146,7 @@ class Play(commands.Cog):
                        description="Create playlists",
                        options=[
                            create_option(name="name",
-                                         description=" ",
+                                         description="playlist name",
                                          option_type=3,
                                          required=True)
                        ],
@@ -212,22 +212,28 @@ class Play(commands.Cog):
     async def np(self, ctx):
         self.announce_song(ctx, main.bot.playing[ctx.guild.id])
 
-    @cog_ext.cog_slash(name="lyrics",
-                       description="get the video lyrics",
+    @cog_ext.cog_slash(name="subtitle",
+                       description="get the video subtitle",
                        guild_ids=main.bot.guild_ids)
-    async def lyrics(self, ctx):
+    async def subtitle(self, ctx):
         try:
-            lyric = YouTubeTranscriptApi.get_transcripts(video_ids=[main.bot.playing[ctx.guild.id][0]['id']],
-                                                         languages=['en'])
+            sub = YouTubeTranscriptApi.get_transcripts(video_ids=[main.bot.playing[ctx.guild.id][0]['id']],
+                                                       languages=['en'])
             formatted = "```"
-            for text in lyric[0][main.bot.playing[ctx.guild.id][0]['id']]:
+            for text in sub[0][main.bot.playing[ctx.guild.id][0]['id']]:
                 formatted += text['text']+"\n"
             formatted += "```"
-            await ctx.send("Lyrics:")
+            await ctx.send("Subtitle:")
             await ctx.send(formatted)
         except youtube_transcript_api._errors.TranscriptsDisabled as e:
             print("{}".format(type(e).__name__, e))
-            await ctx.send("Couldn't find lyrics!")
+            await ctx.send("Couldn't find subtitles!")
+
+    @cog_ext.cog_slash(name="lyrics",
+                       description="test",
+                       guild_ids=main.bot.guild_ids)
+    async def lyrics(self, ctx):
+        await ctx.send("WIP")
 
 
 def setup(bot):

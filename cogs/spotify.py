@@ -1,11 +1,10 @@
 import discord
-import spotipy
 import discord_music_bot as main
 import datetime as dt
+from utils.spotify_api_request import SpotifyApi
 from cogs.play import search_yt, Play
 from discord.ext import commands
 from discord_slash import cog_ext
-from spotipy.oauth2 import SpotifyClientCredentials
 from discord_slash.utils.manage_commands import create_option
 
 
@@ -18,14 +17,12 @@ class Spotify(commands.Cog):
                        description="search on spotify",
                        options=[
                            create_option(name="music",
-                                         description=" ",
+                                         description="choose music",
                                          option_type=3,
                                          required=True)
                        ],
                        guild_ids=main.bot.guild_ids)
     async def spotify(self, ctx, music):
-        sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id="5502a94b155b49df98eab85103ac811b",
-                                                                   client_secret="f228ab2757214c8bbb69c510a8f80040"))
         embed = discord.Embed(title="Song added to queue from Spotify",
                               color=0x152875)
         embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
@@ -33,7 +30,7 @@ class Spotify(commands.Cog):
         if "open.spotify.com/track" in music:
             a = music.split('track/')
             a = a[1].split('?si')
-            song = sp.track(a[0])
+            song = SpotifyApi().get_by_id(trackid=a[0])
             for artist in song['album']['artists']:
                 artists += "".join("{}, ".format(artist['name']))
             artists = artists[:-2]
@@ -43,7 +40,7 @@ class Spotify(commands.Cog):
                                 seconds=int(int(song['duration_ms'])/1000)))))
             query = "{}\n{}".format(song['album']['name'], artists)
         else:
-            song = sp.search(q=music, limit=1, type="track")
+            song = SpotifyApi().get_by_name(q=music, limit=1, type="track")
             for artist in song['tracks']['items'][0]['artists']:
                 artists += "".join("{}, ".format(artist['name']))
             artists = artists[:-2]
