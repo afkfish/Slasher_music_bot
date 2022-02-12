@@ -25,5 +25,6 @@ It requires:
 - /queue
 - /clear all
 - /clear duplicates
-- /lyrics
-- /spotify (search on spotify with song link or name)
+- /lyrics (genius developer account required to connect to api)
+- /subtitle
+- /spotify (spotify developer account required to connect to api)

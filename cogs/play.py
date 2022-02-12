@@ -3,6 +3,8 @@ import random
 import json
 import datetime as dt
 import youtube_transcript_api
+from utils.genius_api_request import GeniusApi
+from utils.lyrics_scrape import get_lyrics
 from youtube_dl import YoutubeDL
 from discord.ext import commands
 from discord_slash import cog_ext
@@ -233,7 +235,16 @@ class Play(commands.Cog):
                        description="test",
                        guild_ids=main.bot.guild_ids)
     async def lyrics(self, ctx):
-        await ctx.send("WIP")
+        embed = discord.Embed(title="Song Lyrics:", color=0x152875)
+        embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
+        try:
+            song = GeniusApi().get_song(main.bot.playing[ctx.guild.id][0]['title'])
+            lyrics = get_lyrics(song)
+            embed.add_field(name=song['title'], value=lyrics)
+            ctx.send(embed=embed)
+        except IndexError as ex:
+            print(f"{type(ex).__name__} {ex}")
+            ctx.send(ex)
 
 
 def setup(bot):
