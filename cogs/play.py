@@ -241,6 +241,7 @@ class Play(commands.Cog):
             song = GeniusApi().get_song(main.bot.playing[ctx.guild.id][0]['title'])
             lyrics = get_lyrics(song)
             embed.add_field(name=song['title'], value=lyrics)
+            embed.set_thumbnail(url=main.bot.playing[ctx.guild.id][0]['thumbnail'])
             ctx.send(embed=embed)
         except IndexError as ex:
             print(f"{type(ex).__name__} {ex}")
