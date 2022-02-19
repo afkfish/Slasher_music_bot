@@ -25,7 +25,7 @@ class Help(commands.Cog):
                                                      "try to stream it into the voice channel where the user is "
                                                      "present.")
             case "spotify":
-                embed.title = "Spotify <:spotify:940575531567546369>"
+                embed.title = "Spotify <:spotify:944554099175727124>"
                 embed.add_field(name="Usage:", value="The spotify command accepts words and spotify song links. "
                                                      "The user must be in a voice channel in order to use the command."
                                                      "The bot will search in the spotify API to find the requested "
@@ -36,48 +36,80 @@ class Help(commands.Cog):
                 embed.add_field(name="Usage:", value="The queue command sends an embed displaying the previously "
                                                      "added tracks that will be played.")
             case "skip":
-                embed.title = "Skip"
+                embed.title = "Skip :next_track:"
                 embed.add_field(name="Usage:", value="The skip command allows the user to skip a track when the bot "
                                                      "is playing. If nothing is in the queue then the bot will stop.")
+            case "pause":
+                embed.title = "Pause :pause_button:"
+                embed.add_field(name="Usage:", value="The pause command has no parameters. It tries to stop the music "
+                                                     "if the bot is playing.")
+            case "resume":
+                embed.title = "Resume"
+                embed.add_field(name="Usage:", value="The resume command resumes the music if it has been paused.")
+            case "stop":
+                embed.title = "Stop :stop_button:"
+                embed.add_field(name="Usage:", value="The stop command stops the media playing. The next song in the "
+                                                     "queue can be played once a new song is added by a play command.")
+            case _:
+                embed.title = "Work in progress"
         await ctx.send(embed=embed)
 
     @cog_ext.cog_slash(name="help",
                        description="Get info on commands.",
-                       guild_ids=main.bot.guild_ids)
+                       guild_ids=[940575531567546369])
     async def help(self, ctx):
         await ctx.send("Commands: ")
 
     @cog_ext.cog_subcommand(base="help",
-                            subcommand_group="commands",
                             name="play",
                             description="play command",
-                            base_description="text commands",
-                            guild_ids=main.bot.guild_ids)
+                            guild_ids=[940575531567546369])
     async def help_play(self, ctx):
         await self.help_embed(ctx=ctx, command="play")
 
     @cog_ext.cog_subcommand(base="help",
-                            subcommand_group="commands",
                             name="spotify",
                             description="spotify command",
-                            guild_ids=main.bot.guid_ids)
+                            guild_ids=[940575531567546369])
     async def help_spotify(self, ctx):
         await self.help_embed(ctx=ctx, command="spotify")
 
     @cog_ext.cog_subcommand(base="help",
-                            subcommand_group="commands",
                             name="queue",
                             description="queue command",
-                            base_description="text commands",
-                            guild_ids=main.bot.guild_ids)
-    async def help_play(self, ctx):
+                            guild_ids=[940575531567546369])
+    async def help_queue(self, ctx):
         await self.help_embed(ctx=ctx, command="queue")
 
     @cog_ext.cog_subcommand(base="help",
                             subcommand_group="commands",
                             name="skip",
                             description="skip command",
-                            base_description="text commands",
-                            guild_ids=main.bot.guild_ids)
-    async def help_play(self, ctx):
+                            guild_ids=[940575531567546369])
+    async def help_skip(self, ctx):
         await self.help_embed(ctx=ctx, command="skip")
+
+    @cog_ext.cog_subcommand(base="help",
+                            name="pause",
+                            description="pause command",
+                            guild_ids=[940575531567546369])
+    async def help_pause(self, ctx):
+        await self.help_embed(ctx=ctx, command="pause")
+
+    @cog_ext.cog_subcommand(base="help",
+                            name="resume",
+                            description="resume command",
+                            guild_ids=[940575531567546369])
+    async def help_resume(self, ctx):
+        await self.help_embed(ctx=ctx, command="resume")
+
+    @cog_ext.cog_subcommand(base="help",
+                            name="stop",
+                            description="stop command",
+                            guild_ids=[940575531567546369])
+    async def help_stop(self, ctx):
+        await self.help_embed(ctx=ctx, command="stop")
+
+
+def setup(bot):
+    bot.add_cog(Help(bot))
