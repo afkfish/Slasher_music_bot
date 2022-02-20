@@ -50,6 +50,36 @@ class Help(commands.Cog):
                 embed.title = "Stop :stop_button:"
                 embed.add_field(name="Usage:", value="The stop command stops the media playing. The next song in the "
                                                      "queue can be played once a new song is added by a play command.")
+            case "leave":
+                embed.title = "Leave"
+                embed.add_field(name="Usage:", value="The leave command disconnects the bot from the voice channel if "
+                                                     "it was in one.")
+            case "clear duplicates":
+                embed.title = "Clear duplicates"
+                embed.add_field(name="Usage:", value="The clear duplicates command removes the duplicated songs from "
+                                                     "the queue if there are any.")
+            case "clear all":
+                embed.title = "Clear all"
+                embed.add_field(name="Usage:", value="The clear all command empties the queue completely.")
+            case "np":
+                embed.title = "Now Playing"
+                embed.add_field(name="Usage:", value="The np command sends an embed representing the music that is "
+                                                     "currently being played. If the music stopped or skipped but the "
+                                                     "queue is empty than the previously played song will be sent.")
+            case "subtitle":
+                embed.title = "Subtitle"
+                embed.add_field(name="Usage:", value="The subtitle command tries to find subtitles for the audio that "
+                                                     "is being played on youtube in english.")
+            case "lyrics":
+                embed.title = "Lyrics"
+                embed.add_field(name="Usage:", value="The lyrics command tries to find the song on genius and sends "
+                                                     "back the lyrics if it succeded. Not every song will 100% have a "
+                                                     "lyric. If you are sure it has but it is not available on genius "
+                                                     "than the subtitle command could help.")
+            case "ping":
+                embed.title = "Ping"
+                embed.add_field(name="Usage:", value="The ping command measures the latency from the server to the "
+                                                     "client in miliseconds.")
             case _:
                 embed.title = "Work in progress"
         await ctx.send(embed=embed)
@@ -109,6 +139,55 @@ class Help(commands.Cog):
                             guild_ids=[940575531567546369])
     async def help_stop(self, ctx):
         await self.help_embed(ctx=ctx, command="stop")
+
+    @cog_ext.cog_subcommand(base="help",
+                            name="leave",
+                            description="leave command",
+                            guild_ids=[940575531567546369])
+    async def help_leave(self, ctx):
+        await self.help_embed(ctx=ctx, command="leave")
+
+    @cog_ext.cog_subcommand(base="help",
+                            name="clear_dumplicates",
+                            description="clear duplicates command",
+                            guild_ids=[940575531567546369])
+    async def help_clear_d(self, ctx):
+        await self.help_embed(ctx=ctx, command="clear duplicates")
+
+    @cog_ext.cog_subcommand(base="help",
+                            name="clear_all",
+                            description="clear all command",
+                            guild_ids=[940575531567546369])
+    async def help_clear_a(self, ctx):
+        await self.help_embed(ctx=ctx, command="clear all")
+
+    @cog_ext.cog_subcommand(base="help",
+                            name="np",
+                            description="np command",
+                            guild_ids=[940575531567546369])
+    async def help_np(self, ctx):
+        await self.help_embed(ctx=ctx, command="np")
+
+    @cog_ext.cog_subcommand(base="help",
+                            name="subtitle",
+                            description="subtitle command",
+                            guild_ids=[940575531567546369])
+    async def help_subtitle(self, ctx):
+        await self.help_embed(ctx=ctx, command="subtitle")
+
+    @cog_ext.cog_subcommand(base="help",
+                            name="lyrics",
+                            description="lyrics command",
+                            guild_ids=[940575531567546369])
+    async def help_lyrics(self, ctx):
+        await self.help_embed(ctx=ctx, command="lyrics")
+
+    @cog_ext.cog_subcommand(base="help",
+                            name="ping",
+                            description="ping command",
+                            guild_ids=[940575531567546369])
+    async def help_ping(self, ctx):
+        await self.help_embed(ctx=ctx, command="ping")
 
 
 def setup(bot):
