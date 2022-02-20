@@ -245,7 +245,7 @@ class Play(commands.Cog):
             await ctx.send(embed=embed)
         except IndexError as ex:
             print(f"{type(ex).__name__} {ex}")
-            await ctx.send(ex)
+            await ctx.send(f"Error: {ex}")
 
 
 def setup(bot):
