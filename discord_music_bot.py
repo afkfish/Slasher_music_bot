@@ -6,7 +6,7 @@ from discord.ext import commands
 bot = commands.Bot(command_prefix='>')
 slash = SlashCommand(bot, sync_commands=True)
 
-# bot.remove_command('help')
+bot.remove_command('help')
 
 with open("secrets.json", "r") as file:
     application_key = json.load(file)["discord"]["app_key"]
@@ -15,7 +15,8 @@ modules = [
     'navigation',
     'play',
     'settings',
-    'spotify'
+    'spotify',
+    'help'
 ]
 
 

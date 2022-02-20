@@ -23,7 +23,7 @@ class Spotify(commands.Cog):
                        ],
                        guild_ids=main.bot.guild_ids)
     async def spotify(self, ctx, music):
-        embed = discord.Embed(title="Song added to queue from Spotify",
+        embed = discord.Embed(title="Song added to queue from Spotify <:spotify:944554099175727124>",
                               color=0x152875)
         embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
         artists = ""
