@@ -86,28 +86,28 @@ class Help(commands.Cog):
 
     @cog_ext.cog_slash(name="help",
                        description="Get info on commands.",
-                       guild_ids=[940575531567546369])
+                       guild_ids=main.bot.guild_ids)
     async def help(self, ctx):
         await ctx.send("Commands: ")
 
     @cog_ext.cog_subcommand(base="help",
                             name="play",
                             description="play command",
-                            guild_ids=[940575531567546369])
+                            guild_ids=main.bot.guild_ids)
     async def help_play(self, ctx):
         await self.help_embed(ctx=ctx, command="play")
 
     @cog_ext.cog_subcommand(base="help",
                             name="spotify",
                             description="spotify command",
-                            guild_ids=[940575531567546369])
+                            guild_ids=main.bot.guild_ids)
     async def help_spotify(self, ctx):
         await self.help_embed(ctx=ctx, command="spotify")
 
     @cog_ext.cog_subcommand(base="help",
                             name="queue",
                             description="queue command",
-                            guild_ids=[940575531567546369])
+                            guild_ids=main.bot.guild_ids)
     async def help_queue(self, ctx):
         await self.help_embed(ctx=ctx, command="queue")
 
@@ -115,77 +115,77 @@ class Help(commands.Cog):
                             subcommand_group="commands",
                             name="skip",
                             description="skip command",
-                            guild_ids=[940575531567546369])
+                            guild_ids=main.bot.guild_ids)
     async def help_skip(self, ctx):
         await self.help_embed(ctx=ctx, command="skip")
 
     @cog_ext.cog_subcommand(base="help",
                             name="pause",
                             description="pause command",
-                            guild_ids=[940575531567546369])
+                            guild_ids=main.bot.guild_ids)
     async def help_pause(self, ctx):
         await self.help_embed(ctx=ctx, command="pause")
 
     @cog_ext.cog_subcommand(base="help",
                             name="resume",
                             description="resume command",
-                            guild_ids=[940575531567546369])
+                            guild_ids=main.bot.guild_ids)
     async def help_resume(self, ctx):
         await self.help_embed(ctx=ctx, command="resume")
 
     @cog_ext.cog_subcommand(base="help",
                             name="stop",
                             description="stop command",
-                            guild_ids=[940575531567546369])
+                            guild_ids=main.bot.guild_ids)
     async def help_stop(self, ctx):
         await self.help_embed(ctx=ctx, command="stop")
 
     @cog_ext.cog_subcommand(base="help",
                             name="leave",
                             description="leave command",
-                            guild_ids=[940575531567546369])
+                            guild_ids=main.bot.guild_ids)
     async def help_leave(self, ctx):
         await self.help_embed(ctx=ctx, command="leave")
 
     @cog_ext.cog_subcommand(base="help",
                             name="clear_dumplicates",
                             description="clear duplicates command",
-                            guild_ids=[940575531567546369])
+                            guild_ids=main.bot.guild_ids)
     async def help_clear_d(self, ctx):
         await self.help_embed(ctx=ctx, command="clear duplicates")
 
     @cog_ext.cog_subcommand(base="help",
                             name="clear_all",
                             description="clear all command",
-                            guild_ids=[940575531567546369])
+                            guild_ids=main.bot.guild_ids)
     async def help_clear_a(self, ctx):
         await self.help_embed(ctx=ctx, command="clear all")
 
     @cog_ext.cog_subcommand(base="help",
                             name="np",
                             description="np command",
-                            guild_ids=[940575531567546369])
+                            guild_ids=main.bot.guild_ids)
     async def help_np(self, ctx):
         await self.help_embed(ctx=ctx, command="np")
 
     @cog_ext.cog_subcommand(base="help",
                             name="subtitle",
                             description="subtitle command",
-                            guild_ids=[940575531567546369])
+                            guild_ids=main.bot.guild_ids)
     async def help_subtitle(self, ctx):
         await self.help_embed(ctx=ctx, command="subtitle")
 
     @cog_ext.cog_subcommand(base="help",
                             name="lyrics",
                             description="lyrics command",
-                            guild_ids=[940575531567546369])
+                            guild_ids=main.bot.guild_ids)
     async def help_lyrics(self, ctx):
         await self.help_embed(ctx=ctx, command="lyrics")
 
     @cog_ext.cog_subcommand(base="help",
                             name="ping",
                             description="ping command",
-                            guild_ids=[940575531567546369])
+                            guild_ids=main.bot.guild_ids)
     async def help_ping(self, ctx):
         await self.help_embed(ctx=ctx, command="ping")
 
