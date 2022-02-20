@@ -240,9 +240,19 @@ class Play(commands.Cog):
         try:
             song = GeniusApi().get_song(main.bot.playing[ctx.guild.id][0]['title'])
             lyrics = get_lyrics(song)
-            embed.add_field(name=song['title'], value=lyrics)
-            embed.set_thumbnail(url=main.bot.playing[ctx.guild.id][0]['thumbnail'])
-            await ctx.send(embed=embed)
+            if len(lyrics) > 1000:
+                ly1 = lyrics[:len(lyrics)//2]
+                ly2 = lyrics[len(lyrics)//2:]
+                embed.add_field(name=song['title'], value=ly1)
+                embed2 = discord.Embed(color=0x152875)
+                embed2.add_field(name="", value=ly2)
+                embed.set_thumbnail(url=main.bot.playing[ctx.guild.id][0]['thumbnail'])
+                await ctx.send(embed=embed)
+                await ctx.send(embed=embed2)
+            else:
+                embed.add_field(name=song['title'], value=lyrics)
+                embed.set_thumbnail(url=main.bot.playing[ctx.guild.id][0]['thumbnail'])
+                await ctx.send(embed=embed)
         except IndexError as ex:
             print(f"{type(ex).__name__} {ex}")
             await ctx.send(f"Error: {ex}")
