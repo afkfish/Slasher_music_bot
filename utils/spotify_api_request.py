@@ -29,13 +29,13 @@ class SpotifyApi:
         res = requests.get(url=trackurl, headers=headers)
         return res.json()
 
-    def get_by_name(self, q, type, limit):
+    def get_by_name(self, q, type_, limit):
         r = requests.post(self.url, headers=self.headers, data=self.data)
         token = r.json()['access_token']
 
         link = {
             "q": q,
-            "type": type,
+            "type": type_,
             "limit": limit
         }
         headers = {

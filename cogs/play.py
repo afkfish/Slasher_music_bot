@@ -106,13 +106,11 @@ class Play(commands.Cog):
                            )],
                        guild_ids=main.bot.guild_ids)
     async def play(self, ctx, music):
+        await ctx.send('Bot is thinking!', delete_after=1)
         query = "".join(music)
         voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
-        voice_channel = ctx.author.voice.channel
-        if voice_channel is None:
-            # you need to be connected so that the bot knows where to go
-            await ctx.send("Connect to a voice channel!")
-        else:
+        if ctx.author.voice:
+            voice_channel = ctx.author.voice.channel
             song = search_yt(query)
             if song is False:
                 await ctx.send(
@@ -130,11 +128,14 @@ class Play(commands.Cog):
                 embed.set_footer(text="Song requested by: " + ctx.author.name)
                 await ctx.send(embed=embed)
                 await self.play_music(ctx, voice)
+        else:
+            await ctx.send("Connect to a voice channel!")
 
     @cog_ext.cog_slash(name="queue",
                        description="Displays the songs in the queue",
                        guild_ids=main.bot.guild_ids)
     async def queue(self, ctx):
+        await ctx.send('Bot is thinking!', delete_after=1)
         embed = discord.Embed(title="Queue", color=0x152875)
         embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
         songs = self.slist(ctx)
@@ -200,7 +201,7 @@ class Play(commands.Cog):
                 await ctx.send("Connect to a voice channel!")
             else:
                 song = search_yt(item)
-                print(item)
+                # print(item)
                 if song is False:
                     await ctx.send("Could not play the song from the playlist.")
                 else:
@@ -212,6 +213,7 @@ class Play(commands.Cog):
                        description="The song that is currently being played",
                        guild_ids=main.bot.guild_ids)
     async def np(self, ctx):
+        await ctx.send('Bot is thinking!', delete_after=1)
         self.announce_song(ctx, main.bot.playing[ctx.guild.id])
 
     @cog_ext.cog_slash(name="subtitle",
@@ -235,6 +237,7 @@ class Play(commands.Cog):
                        description="test",
                        guild_ids=main.bot.guild_ids)
     async def lyrics(self, ctx):
+        await ctx.send('Bot is thinking!', delete_after=1)
         embed = discord.Embed(title="Song Lyrics:", color=0x152875)
         embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
         try:

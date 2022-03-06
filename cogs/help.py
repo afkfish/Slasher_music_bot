@@ -11,6 +11,7 @@ class Help(commands.Cog):
 
     @staticmethod
     async def help_embed(ctx, command: str):
+        await ctx.send('Bot is thinking!', delete_after=0.3)
         embed = discord.Embed(color=0x152875)
         embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
         match command:

@@ -67,37 +67,43 @@ async def on_guid_join(guild):
              description="Load cogs",
              guild_ids=[940575531567546369])
 async def load(ctx, extension):
+    ctx.send('Bot is thinking!', delete_after=1)
     try:
         bot.load_extension(f'cogs.{extension}')
         await ctx.send("Succefully loaded {}".format(extension))
     except Exception as ex:
         print('Failed to load mod {0}\n{1}: {2}'.format(extension, type(ex).__name__, ex))
-        await ctx.send("Loading {} was unsuccesful\nError: {}\n{}: {}".format(extension, extension, type(ex).__name__, ex))
+        await ctx.send("Loading {} was unsuccesful"
+                       "\nError: {}\n{}: {}".format(extension, extension, type(ex).__name__, ex))
 
 
 @slash.slash(name="unload",
              description="Unload cogs",
              guild_ids=[940575531567546369])
 async def unload(ctx, extension):
+    ctx.send('Bot is thinking!', delete_after=1)
     try:
         bot.unload_extension(f'cogs.{extension}')
         await ctx.send("Succefully unloaded {}".format(extension))
     except Exception as ex:
         print('Failed to unload mod {0}\n{1}: {2}'.format(extension, type(ex).__name__, ex))
-        await ctx.send("Unloading {} was unsuccesful\nError: {}\n{}: {}".format(extension, extension, type(ex).__name__, ex))
+        await ctx.send("Unloading {} was unsuccesful"
+                       "\nError: {}\n{}: {}".format(extension, extension, type(ex).__name__, ex))
 
 
 @slash.slash(name="reload",
              description="Reload cogs",
              guild_ids=[940575531567546369])
 async def reload(ctx, extension):
+    await ctx.send('Bot is thinking!', delete_after=1)
     try:
         bot.unload_extension(f'cogs.{extension}')
         bot.load_extension(f'cogs.{extension}')
         await ctx.send("Succefully reloaded {}".format(extension))
     except Exception as ex:
         print('Failed to reload mod {0}\n{1}: {2}'.format(extension, type(ex).__name__, ex))
-        await ctx.send("Reloading {} was unsuccesful\nError: {}\n{}: {}".format(extension, extension, type(ex).__name__, ex))
+        await ctx.send("Reloading {} was unsuccesful"
+                       "\nError: {}\n{}: {}".format(extension, extension, type(ex).__name__, ex))
 
 
 @slash.slash(name="ping",
