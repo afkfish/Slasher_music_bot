@@ -15,6 +15,7 @@ modules = [
     'play',
     'settings',
     'spotify',
+    'seek',
     'help'
 ]
 
