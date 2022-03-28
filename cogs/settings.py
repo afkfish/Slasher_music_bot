@@ -53,6 +53,7 @@ class Settings(commands.Cog):
                             ],
                             guild_ids=main.bot.guild_ids)
     async def settings_shuffle(self, ctx, **shuffle_play: str):
+        await ctx.send('Bot is thinking!', delete_after=0.3)
         with open('./settings/settings.json', 'r') as f:
             data = json.load(f)
         if bool(shuffle_play["shuffle_play"]):
@@ -77,6 +78,7 @@ class Settings(commands.Cog):
                             ],
                             guild_ids=main.bot.guild_ids)
     async def settings_announce(self, ctx, **announce_songs: str):
+        await ctx.send('Bot is thinking!', delete_after=0.3)
         with open('./settings/settings.json', 'r') as f:
             data = json.load(f)
         if bool(announce_songs['announce_songs']):
