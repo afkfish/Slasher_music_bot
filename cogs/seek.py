@@ -1,4 +1,5 @@
 import discord
+import datetime as dt
 from discord.ext import commands
 from discord_slash import cog_ext
 from cogs.play import Play
@@ -19,7 +20,7 @@ class Seek(commands.Cog):
         voice_channel = ctx.author.voice.channel
         voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         # if the bot has playen a song before
-        if len(main.bot.playing[ctx.guild.id]) is not 0:
+        if len(main.bot.playing[ctx.guild.id]) != 0:
             m_url = main.bot.playing[ctx.guild.id][0]['source']
             # if there is no voice channel
             if voice_channel is None:
@@ -33,13 +34,15 @@ class Seek(commands.Cog):
                 else:
                     # move the bot to the voice
                     await voice.move_to(main.bot.playing[ctx.guild.id][1])
+                formatted_time = dt.timedelta(seconds=int(time))
+                voice.stop()
                 # play the song with discord.FFmpegPCMaudio
-                voice.play(discord.FFmpegPCMAudio(before_options=f'{time} -reconnect 1 -reconnect_streamed 1 '
+                voice.play(discord.FFmpegPCMAudio(before_options=f'-ss {time} -reconnect 1 -reconnect_streamed 1 '
                                                                  '-reconnect_delay_max 5',
                                                   source=m_url),
                            after=lambda e: Play(commands.Cog).play_next(ctx, voice))
                 # send a message saying the bot is now playing the song
-                await ctx.send(f'Now playing {main.bot.playing[ctx.guild.id][0][0]["title"]} from {time} seconds.')
+                await ctx.send(f'Now playing {main.bot.playing[ctx.guild.id][0]["title"]} from {formatted_time} seconds.')
         else:
             # send a message to play a song in order to seek in it
             await ctx.send('You need to play a song before you can seek in it.')
