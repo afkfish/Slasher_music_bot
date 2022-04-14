@@ -23,7 +23,7 @@ class Spotify(commands.Cog):
                        ],
                        guild_ids=main.bot.guild_ids)
     async def spotify(self, ctx, music):
-        await ctx.send('Bot is thinking!', delete_after=0.3)
+        msg = await ctx.send('Bot is thinking!')
         embed = discord.Embed(title=f"Song added to queue from Spotify {self.bot.get_emoji(944554099175727124)}",
                               color=0x152875)
         embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
@@ -56,15 +56,14 @@ class Spotify(commands.Cog):
             voice_channel = ctx.author.voice.channel
             track = search_yt(query)
             if track is False:
-                await ctx.send(
-                    "Could not download the song. Incorrect format try another keyword. This could be due to "
-                    "playlist or a livestream format.")
+                await msg.edit(content="Could not download the song. Incorrect format try another keyword. This could "
+                                       "be due to playlist or a livestream format.")
             else:
                 main.bot.music_queue[ctx.guild.id].append([track, voice_channel])
                 await Play(commands.cog).play_music(ctx, voice)
-            await ctx.send(embed=embed)
+            await msg.edit(embed=embed)
         else:
-            await ctx.send("Connect to a voice channel!")
+            await msg.edit(content="Connect to a voice channel!")
 
 
 def setup(bot):

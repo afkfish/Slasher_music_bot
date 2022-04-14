@@ -6,7 +6,7 @@ from discord_slash import cog_ext
 from discord_slash.utils.manage_commands import create_option
 
 
-async def settings_embed(ctx):
+async def settings_embed(ctx, msg):
     embed = discord.Embed(title="Settings",
                           description="The setting related to the bot",
                           color=0x152875)
@@ -26,7 +26,7 @@ async def settings_embed(ctx):
                         "True :white_check_mark:" if main.bot_announce(ctx.guild.id) else "False :x:"
                     ),
                     inline=True)
-    await ctx.send(embed=embed)
+    await msg.edit(embed=embed)
 
 
 class Settings(commands.Cog):
@@ -53,7 +53,7 @@ class Settings(commands.Cog):
                             ],
                             guild_ids=main.bot.guild_ids)
     async def settings_shuffle(self, ctx, **shuffle_play: str):
-        await ctx.send('Bot is thinking!', delete_after=0.3)
+        msg = await ctx.send('Bot is thinking!')
         with open('./settings/settings.json', 'r') as f:
             data = json.load(f)
         if bool(shuffle_play["shuffle_play"]):
@@ -62,7 +62,7 @@ class Settings(commands.Cog):
             data[str(ctx.guild.id)]['shuffle'] = False
         with open('./settings/settings.json', 'w') as f:
             json.dump(data, f, indent=4)
-        await settings_embed(ctx)
+        await settings_embed(ctx, msg)
 
     @cog_ext.cog_subcommand(base="settings",
                             name="songs",
@@ -78,7 +78,7 @@ class Settings(commands.Cog):
                             ],
                             guild_ids=main.bot.guild_ids)
     async def settings_announce(self, ctx, **announce_songs: str):
-        await ctx.send('Bot is thinking!', delete_after=0.3)
+        msg = await ctx.send('Bot is thinking!')
         with open('./settings/settings.json', 'r') as f:
             data = json.load(f)
         if bool(announce_songs['announce_songs']):
@@ -87,7 +87,7 @@ class Settings(commands.Cog):
             data[str(ctx.guild.id)]['announce'] = False
         with open('./settings/settings.json', 'w') as f:
             json.dump(data, f, indent=4)
-        await settings_embed(ctx)
+        await settings_embed(ctx, msg)
 
 
 def setup(bot):
