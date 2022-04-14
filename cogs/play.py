@@ -106,16 +106,16 @@ class Play(commands.Cog):
                            )],
                        guild_ids=main.bot.guild_ids)
     async def play(self, ctx, music):
-        await ctx.send('Bot is thinking!', delete_after=1)
+        msg = await ctx.send('Bot is thinking!')
         query = "".join(music)
         voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         if ctx.author.voice:
             voice_channel = ctx.author.voice.channel
             song = search_yt(query)
             if song is False:
-                await ctx.send(
-                    "Could not download the song. Incorrect format try another keyword. This could be due to "
-                    "playlist or a livestream format.")
+                await msg.edit(content=
+                               "Could not download the song. Incorrect format try another keyword. This could be due "
+                               "to playlist or a livestream format.")
             else:
                 main.bot.music_queue[ctx.guild.id].append([song, voice_channel])
                 embed = discord.Embed(title="Song added to queue", color=0x152875)
@@ -126,16 +126,16 @@ class Play(commands.Cog):
                                     seconds=int(main.bot.music_queue[ctx.guild.id][-1][0]['duration']))),
                                 inline=True)
                 embed.set_footer(text="Song requested by: " + ctx.author.name)
-                await ctx.send(embed=embed)
+                await msg.edit(embed=embed)
                 await self.play_music(ctx, voice)
         else:
-            await ctx.send("Connect to a voice channel!")
+            await msg.edit(content="Connect to a voice channel!")
 
     @cog_ext.cog_slash(name="queue",
                        description="Displays the songs in the queue",
                        guild_ids=main.bot.guild_ids)
     async def queue(self, ctx):
-        await ctx.send('Bot is thinking!', delete_after=1)
+        msg = await ctx.send('Bot is thinking!')
         embed = discord.Embed(title="Queue", color=0x152875)
         embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
         songs = self.slist(ctx)
@@ -143,7 +143,7 @@ class Play(commands.Cog):
             embed.add_field(name="Songs: ", value=songs, inline=True)
         else:
             embed.add_field(name="Songs: ", value="No music in queue", inline=True)
-        await ctx.send(embed=embed)
+        await msg.edit(embed=embed)
 
     @cog_ext.cog_slash(name="createpl",
                        description="Create playlists",
@@ -225,7 +225,7 @@ class Play(commands.Cog):
                                                        languages=['en'])
             formatted = "```"
             for text in sub[0][main.bot.playing[ctx.guild.id][0]['id']]:
-                formatted += text['text']+"\n"
+                formatted += text['text'] + "\n"
             formatted += "```"
             await ctx.send("Subtitle:")
             await ctx.send(formatted)
@@ -244,8 +244,8 @@ class Play(commands.Cog):
             song = GeniusApi().get_song(main.bot.playing[ctx.guild.id][0]['title'])
             lyrics = get_lyrics(song)
             if len(lyrics) > 1000:
-                ly1 = lyrics[:len(lyrics)//2]
-                ly2 = lyrics[len(lyrics)//2:]
+                ly1 = lyrics[:len(lyrics) // 2]
+                ly2 = lyrics[len(lyrics) // 2:]
                 embed.add_field(name=song['title'], value=ly1)
                 embed2 = discord.Embed(color=0x152875)
                 embed2.add_field(name="", value=ly2)

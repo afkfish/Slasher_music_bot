@@ -11,7 +11,7 @@ class Help(commands.Cog):
 
     @staticmethod
     async def help_embed(ctx, command: str):
-        await ctx.send('Bot is thinking!', delete_after=0.3)
+        msg = await ctx.send('Bot is thinking!')
         embed = discord.Embed(color=0x152875)
         embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
         match command:
@@ -83,7 +83,7 @@ class Help(commands.Cog):
                                                      "client in miliseconds.")
             case _:
                 embed.title = "Work in progress"
-        await ctx.send(embed=embed)
+        await msg.edit(embed=embed)
 
     @cog_ext.cog_slash(name="help",
                        description="Get info on commands.",

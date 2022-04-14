@@ -15,12 +15,12 @@ class Navigation(commands.Cog):
                        description="Skip the current song",
                        guild_ids=main.bot.guild_ids)
     async def skip(self, ctx):
-        await ctx.send('Bot is thinking!', delete_after=0.3)
+        msg = await ctx.send('Bot is thinking!')
         voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         if voice != "" and voice:
             voice.stop()
             embed = discord.Embed(title="Skipped :next_track:")
-            await ctx.send(embed=embed)
+            await msg.edit(embed=embed)
             # try to play next in the queue if it exists
             if voice.is_playing():
                 obj = Play(commands.Cog)
@@ -30,43 +30,43 @@ class Navigation(commands.Cog):
                        description="Pause the song",
                        guild_ids=main.bot.guild_ids)
     async def pause_(self, ctx):
-        await ctx.send('Bot is thinking!', delete_after=0.3)
+        msg = await ctx.send('Bot is thinking!')
         voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         if voice.is_playing():
             embed = discord.Embed(title="Paused :pause_button:")
-            await ctx.send(embed=embed)
+            await msg.edit(embed=embed)
             voice.pause()
 
     @cog_ext.cog_slash(name="resume",
                        description="Resume playing",
                        guild_ids=main.bot.guild_ids)
     async def resume_(self, ctx):
-        await ctx.send('Bot is thinking!', delete_after=0.3)
+        msg = await ctx.send('Bot is thinking!')
         voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         if voice.is_paused():
             embed = discord.Embed(title="Resumed")
-            await ctx.send(embed=embed)
+            await msg.edit(embed=embed)
             voice.resume()
 
     @cog_ext.cog_slash(name="stop",
                        description="Stop playing",
                        guild_ids=main.bot.guild_ids)
     async def stop_(self, ctx):
-        await ctx.send('Bot is thinking!', delete_after=0.3)
+        msg = await ctx.send('Bot is thinking!')
         voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         embed = discord.Embed(title="Stopped :stop_button:")
-        await ctx.send(embed=embed)
+        await msg.edit(embed=embed)
         voice.stop()
 
     @cog_ext.cog_slash(name="leave",
                        description="Leave voice chat",
                        guild_ids=main.bot.guild_ids)
     async def leave_(self, ctx):
-        await ctx.send('Bot is thinking!', delete_after=0.3)
+        msg = await ctx.send('Bot is thinking!')
         voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         if voice.is_connected():
             await voice.disconnect()
-            await ctx.send("Disconnected!")
+            await msg.edit(content="Disconnected!")
 
     @cog_ext.cog_slash(name="clear",
                        description="clear",
@@ -79,7 +79,7 @@ class Navigation(commands.Cog):
                             description="Clear duplicated songs from queue.",
                             guild_ids=main.bot.guild_ids)
     async def clear_dup(self, ctx):
-        await ctx.send('Bot is thinking!', delete_after=0.3)
+        msg = await ctx.send('Bot is thinking!')
         if main.bot.music_queue[ctx.guild.id]:
             res = []
             [res.append(x) for x in main.bot.music_queue[ctx.guild.id] if x not in res]
@@ -91,18 +91,18 @@ class Navigation(commands.Cog):
             embed.add_field(name="Songs: ", value=songs, inline=True)
         else:
             embed.add_field(name="Songs: ", value="No music in queue", inline=True)
-        await ctx.send(embed=embed)
+        await msg.edit(embed=embed)
 
     @cog_ext.cog_subcommand(base="clear",
                             name="all",
                             description="Clear all songs from queue.",
                             guild_ids=main.bot.guild_ids)
     async def clear_all(self, ctx):
-        await ctx.send('Bot is thinking!', delete_after=0.3)
+        msg = await ctx.send('Bot is thinking!')
         if main.bot.music_queue[ctx.guild.id]:
             main.bot.music_queue[ctx.guild.id] = []
         embed = discord.Embed(title="Queue cleared! :broom:", color=0x152875)
-        await ctx.send(embed=embed)
+        await msg.edit(embed=embed)
 
 
 def setup(bot):
