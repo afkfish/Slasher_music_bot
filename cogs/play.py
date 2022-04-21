@@ -22,8 +22,10 @@ JSON_FORMAT = {'name': '', 'songs': []}
 def search_yt(item):
     with YoutubeDL(YDL_OPTIONS) as ydl:
         try:
-            info = ydl.extract_info("ytsearch:%s" % item, download=False)['entries'][0]
-            # print(info)
+            if item.startswith("https://www.youtube.com/watch?v="):
+                info = ydl.extract_info(item, download=False)
+            else:
+                info = ydl.extract_info("ytsearch:%s" % item, download=False)['entries'][0]
         except ValueError:
             return False
 
@@ -43,14 +45,17 @@ class Play(commands.Cog):
             slist += song[0]['title'] + "\n"
         return slist
 
-    def announce_song(self, ctx, a):
+    def announce_song(self, ctx, a, msg=None):
         embed = discord.Embed(title="Currently playing:", color=0x152875)
         embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
         embed.set_thumbnail(url=a[0]['thumbnail'])
         embed.add_field(name=a[0]['title'],
                         value=str(dt.timedelta(seconds=int(a[0]['duration']))),
                         inline=True)
-        self.bot.loop.create_task(ctx.send(embed=embed))
+        if msg is None:
+            self.bot.loop.create_task(ctx.send(embed=embed))
+        else:
+            msg.edit(embed=embed)
 
     def play_next(self, ctx, vc):
         if len(main.bot.music_queue[ctx.guild.id]) > 0:
@@ -77,23 +82,22 @@ class Play(commands.Cog):
 
     # infinite loop checking
     async def play_music(self, ctx, vc):
-        if len(main.bot.music_queue[ctx.guild.id]) > 0:
-            m_url = main.bot.music_queue[ctx.guild.id][0][0]['source']
-            # try to connect to voice channel if you are not already connected
-            if vc == "" or vc is None:
-                vc = await main.bot.music_queue[ctx.guild.id][0][1].connect()
-            else:
-                await vc.move_to(main.bot.music_queue[ctx.guild.id][0][1])
-            # remove the first element as you are currently playing it
-            if not vc.is_playing():
-                if main.bot_announce(ctx.guild.id):
-                    self.announce_song(ctx, main.bot.music_queue[ctx.guild.id][0])
-                main.bot.playing[ctx.guild.id] = main.bot.music_queue[ctx.guild.id][0]
-                main.bot.music_queue[ctx.guild.id].pop(0)
-                if vc.is_connected:
-                    vc.play(discord.FFmpegPCMAudio(before_options='-reconnect 1 -reconnect_streamed 1 '
-                                                                  '-reconnect_delay_max 5',
-                                                   source=m_url), after=lambda e: self.play_next(ctx, vc))
+        m_url = main.bot.music_queue[ctx.guild.id][0][0]['source']
+        # try to connect to voice channel if you are not already connected
+        if vc == "" or type(vc) is None:
+            vc = await main.bot.music_queue[ctx.guild.id][0][1].connect()
+        else:
+            await vc.move_to(main.bot.music_queue[ctx.guild.id][0][1])
+        # remove the first element as you are currently playing it
+        if not vc.is_playing():
+            if main.bot_announce(ctx.guild.id):
+                self.announce_song(ctx, main.bot.music_queue[ctx.guild.id][0])
+            main.bot.playing[ctx.guild.id] = main.bot.music_queue[ctx.guild.id][0]
+            main.bot.music_queue[ctx.guild.id].pop(0)
+            if vc.is_connected:
+                vc.play(discord.FFmpegPCMAudio(before_options='-reconnect 1 -reconnect_streamed 1 '
+                                                              '-reconnect_delay_max 5',
+                                               source=m_url), after=lambda e: self.play_next(ctx, vc))
 
     @cog_ext.cog_slash(name="play",
                        description="Play a song",
@@ -112,7 +116,7 @@ class Play(commands.Cog):
         if ctx.author.voice:
             voice_channel = ctx.author.voice.channel
             song = search_yt(query)
-            if song is False:
+            if not song:
                 await msg.edit(content=
                                "Could not download the song. Incorrect format try another keyword. This could be due "
                                "to playlist or a livestream format.")
@@ -213,8 +217,8 @@ class Play(commands.Cog):
                        description="The song that is currently being played",
                        guild_ids=main.bot.guild_ids)
     async def np(self, ctx):
-        await ctx.send('Bot is thinking!', delete_after=1)
-        self.announce_song(ctx, main.bot.playing[ctx.guild.id])
+        msg = await ctx.send('Bot is thinking!')
+        self.announce_song(ctx, main.bot.playing[ctx.guild.id], msg)
 
     @cog_ext.cog_slash(name="subtitle",
                        description="get the video subtitle",
