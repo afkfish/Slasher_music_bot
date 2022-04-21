@@ -45,7 +45,8 @@ class Play(commands.Cog):
             slist += song[0]['title'] + "\n"
         return slist
 
-    def announce_song(self, ctx, a, msg=None):
+    @staticmethod
+    def announce_song(ctx, a, msg=None):
         embed = discord.Embed(title="Currently playing:", color=0x152875)
         embed.set_author(name="Slasher", icon_url="https://i.imgur.com/shZLAQk.jpg")
         embed.set_thumbnail(url=a[0]['thumbnail'])
@@ -53,9 +54,9 @@ class Play(commands.Cog):
                         value=str(dt.timedelta(seconds=int(a[0]['duration']))),
                         inline=True)
         if msg is None:
-            self.bot.loop.create_task(ctx.send(embed=embed))
+            main.bot.loop.create_task(ctx.send(embed=embed))
         else:
-            msg.edit(embed=embed)
+            main.bot.loop.create_task(msg.edit(embed=embed))
 
     def play_next(self, ctx, vc):
         if len(main.bot.music_queue[ctx.guild.id]) > 0:
@@ -84,7 +85,7 @@ class Play(commands.Cog):
     async def play_music(self, ctx, vc):
         m_url = main.bot.music_queue[ctx.guild.id][0][0]['source']
         # try to connect to voice channel if you are not already connected
-        if vc == "" or type(vc) is None:
+        if vc == "" or vc is None:
             vc = await main.bot.music_queue[ctx.guild.id][0][1].connect()
         else:
             await vc.move_to(main.bot.music_queue[ctx.guild.id][0][1])

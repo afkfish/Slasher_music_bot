@@ -12,7 +12,9 @@ class Seek(commands.Cog):
         self.bot = bot
 
     # create a seek command from cog_ext
-    @cog_ext.cog_slash(name='seek', description='Seek to a specific time in the song.')  # async function for command
+    @cog_ext.cog_slash(name='seek',
+                       description='Seek to a specific time in the song.',
+                       guild_ids=main.bot.guild_ids)  # async function for command
     async def seek(self, ctx, time):
         # send a message saying that the bot is thinking with a 1-second lifespan
         msg = await ctx.send('The bot is thinking...')
